@@ -18,7 +18,7 @@ for r in samfile_in:
         if len(records) != 1:
             for record in records:
                 samfile_out.write(record)
-        records.clear()
+        records[:] = []
 
         current_name = r.query_name
         records.append(r)
@@ -27,7 +27,7 @@ for r in samfile_in:
 if len(records) != 1:
     for r in records:
         samfile_out.write(r)
-records.clear()
+records[:] = []
 
 samfile_in.close()
 samfile_out.close()
