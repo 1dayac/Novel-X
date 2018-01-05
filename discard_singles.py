@@ -16,8 +16,8 @@ for r in samfile_in:
         continue
     if current_name != r.query_name:
         if len(records) != 1:
-            for r in records:
-                samfile_out.write(r)
+            for record in records:
+                samfile_out.write(record)
         records.clear()
 
         current_name = r.query_name
