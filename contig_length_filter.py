@@ -3,7 +3,7 @@ import sys
 from Bio import SeqIO
 
 if len(sys.argv) < 4: 
-    print "Usage: %s <length threshold> <contigs_file> <output>" % sys.argv[0]
+    print("Usage: %s <length threshold> <contigs_file> <output>" % sys.argv[0])
     sys.exit(1) 
 
 f_n = sys.argv[2]
