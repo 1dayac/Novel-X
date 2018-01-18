@@ -9,15 +9,15 @@ def Usage():
     print("Usage: bam_to_vcf.py <directory with sam-files> <path_to_vcf_file>")
 
 
-if sys.argc != 2:
+if len(sys.argv) != 3:
     Usage()
     exit(0)
 
-onlyfiles = [os.join(sys.argv[1], f) for f in os.listdir(sys.argv[1]) if f.endswith(".sam")]
+onlyfiles = [os.path.join(sys.argv[1], f) for f in os.listdir(sys.argv[1]) if f.endswith(".sam")]
 print(onlyfiles)
 with open(sys.argv[2], "w") as vcf:
     for file in onlyfiles:
-        with pysam.AlignmentFile(sys.argv[1], "rs") as samfile_in:
+        with pysam.AlignmentFile(file, "rb") as samfile_in:
             for aligned_segment in samfile_in:
                 ref_id = aligned_segment.reference_id
                 cigartuples = aligned_segment.cigartuples
@@ -31,7 +31,7 @@ with open(sys.argv[2], "w") as vcf:
                         ref_start += tuple[1]
                         read_start += tuple[1]
                     if tuple[0] == 1:
-                        vcf.write(ref_id + "\t" + ref_start + "\t" + "." + "\t" + seq[read_start] + "\t" + seq[read_start:read_start + tuple[1]] + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\n")
+                        vcf.write(str(ref_id) + "\t" + str(ref_start) + "\t" + "." + "\t" + str(aligned_segment.query_sequence[read_start]) + "\t" + str(aligned_segment.query_sequence[read_start:read_start + tuple[1]]) + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\n")
                         read_start += tuple[1]
 
                     if tuple[0] == 2:
