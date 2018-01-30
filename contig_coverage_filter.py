@@ -4,7 +4,7 @@ import re
 from Bio import SeqIO
 
 def parse_coverage(ctg_name):
-   m = re.search("cov_([\d\.]+)_", ctg_name) 
+   m = re.search("cov_([\d\.]+)", ctg_name) 
    return float(m.group(1))
     
 
