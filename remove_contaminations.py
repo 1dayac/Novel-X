@@ -28,7 +28,7 @@ def main():
     contamination = fcontamination.readline()
     while contamination != '':
         contamination = contamination.split()[0]
-        contig = fcontig.readline()
+        contig = fcontig.readline()[:-1]
         if (contig != ''):
             contig = re.split(">| ", contig)[1]
             while contamination != contig and contig != '':
@@ -41,7 +41,7 @@ def main():
                         break
                 contig = temp_string
                 if (contig != ''):
-                    contig = re.split(">| ", contig)[1]
+                    contig = re.split(">| ", contig)[1][:-1]
             if (contamination == contig and contig != ''):
                 last_pos = fcontig.tell()
                 fcontig.readline()
