@@ -154,4 +154,4 @@ for record in records:
 with open(sys.argv[3], "w") as vcf:
     for insertion in unique:
         ins_seq = str(record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2] if not insertion.rc else record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2].reverse_complement())
-        vcf.write(str(insertion.ref_id) + "\t" + str(insertion.ref_pos) + "\t" + "." + "\t" + str(record_dict[insertion.node].seq[insertion.pos1]) + "\t" + ins_seq + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\t" + insertion.node + "\t" + str(insertion.anchor1) + "\t" + str(insertion.anchor2) + "\n")
+        vcf.write(str(insertion.ref_id) + "\t" + str(insertion.ref_pos) + "\t" + "." + "\t" + str(record_dict[insertion.node].seq[insertion.pos1]) + "\t" + ins_seq + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\t" + insertion.node + "\t" + str(insertion.anchor1) + "\t" + str(insertion.anchor2) + "\t" + str(insertion.pos1) + "\t" + str(insertion.pos2) + "\n")
