@@ -6,7 +6,7 @@ with open(sys.argv[2], "r") as nucmer_file:
     record_dict = SeqIO.to_dict(SeqIO.parse(sys.argv[1], "fasta"))
 
     with open(sys.argv[3], "w") as output_handle:
-        if len(lines) == 1 or lines[1].startswith("CONTIG"):
+        if len(lines) == 1 or  lines[1].startswith("CONTIG"):
             pass
         else:
-            SeqIO.write([record_dict[lines[1].split("\t")[0].strip()]], output_handle, "fasta")
+            SeqIO.write([record_dict[lines[4].split("\t")[0].strip()]], output_handle, "fasta")
