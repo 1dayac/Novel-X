@@ -21,6 +21,8 @@ Novel-X detects and genotypes novel sequence insertions in 10X sequencing datase
 
 ## Publications
 
+"Novel sequence insertion detection using Linked-Reads" is submitted to ISMB-2018 conference. Text is available by request.
+
 ## Contact & Support
 
 Feel free to drop any inquiry to [dmitrii.meleshko@gmail.com]() 
