@@ -1,4 +1,4 @@
-SAMPLES='CHM13_180GB_CrG_GRCh38_phased_possorted'
+SAMPLE='CHM13_180GB_CrG_GRCh38_phased_possorted'
 GIT_ROOT='~/novel_insertions/'
 BLAST_DB='/opt/ncbi-db/data/nt'
 READGROUP='40587_MissingLibrary_1_unknown_fc'
@@ -6,18 +6,18 @@ GENOME='/home/dmeleshko/genome/genome.fa'
 
 rule all:
     input:
-        expand("{sample}.vcf", sample=SAMPLES)
+        expand("{sample}.vcf", sample=SAMPLE)
 
-#rule extract_unmapped:
-#    input:
-#        "samples/{sample}.sorted.bam"
-#    output:
-#        "unmapped/{sample}.bam"
-#    shell:
-#        """
-#        #samtools sort -m 30G -n {input} -o samples/{wildcards.sample}.sorted.bam
-#        ~/bxtools/bin/bxtools filter samples/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
-#        """
+rule extract_unmapped:
+    input:
+        "sample/{sample}.sorted.bam"
+    output:
+        "unmapped/{sample}.bam"
+    shell:
+        """
+        #samtools sort -m 30G -n {input} -o sample/{wildcards.sample}.sorted.bam
+        ~/bxtools/bin/bxtools filter sample/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
+        """
 
 rule convert_bam_to_fastq:
     input:
@@ -46,36 +46,36 @@ rule deinterleave:
         rm {input}
         """
 
-#rule velvet_assembly:
-#    input:
-#        bam='unmapped/{sample}.bam'
-#    output:
-#        fasta='fasta/{sample}.fasta',
-#        no_singles='unmapped/{sample}.no_singles.bam'
-#    shell:
-#        """
-#        rm -rf temp_reads
-#        python ~/novel_insertions/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
-#        ~/bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads
-#        ~/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
-#        gunzip reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq.gz
-#        bash ~/novel_insertions/interleave.sh < reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
-#        ~/velvet/velveth velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
-#        ~/velvet/velvetg velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
-#        mkdir fasta
-#        cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
-#        """
+rule velvet_assembly:
+    input:
+        bam='unmapped/{sample}.bam'
+    output:
+        fasta='fasta/{sample}.fasta',
+        no_singles='unmapped/{sample}.no_singles.bam'
+    shell:
+        """
+        rm -rf temp_reads
+        python ~/novel_insertions/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
+        ~/bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads
+        ~/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
+        gunzip reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq.gz
+        bash ~/novel_insertions/interleave.sh < reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
+        ~/velvet/velveth velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
+        ~/velvet/velvetg velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
+        mkdir fasta
+        cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
+        """
 
 
-#rule filter_length:
-#    input:
-#         fasta='fasta/{sample}.fasta'
-#    output:
-#         filtered_fasta='filtered/{sample}_filtered.long.fasta'
-#    shell:
-#         """
-#         {GIT_ROOT}/contig_length_filter.py 200 {input.fasta} {output.filtered_fasta}
-#         """
+rule filter_length:
+    input:
+         fasta='fasta/{sample}.fasta'
+    output:
+         filtered_fasta='filtered/{sample}_filtered.long.fasta'
+    shell:
+         """
+         {GIT_ROOT}/contig_length_filter.py 200 {input.fasta} {output.filtered_fasta}
+         """
 
 rule filter_contaminants:
     input:
@@ -123,7 +123,7 @@ rule extract_barcode_list:
 rule assemble_barcode_list:
     input:
         barcode_folder='{sample}_barcodes',
-        sample='samples/{sample}.sorted.bam'
+        sample='sample/{sample}.sorted.bam'
     output:
         small_bams='small_bams_{sample}'
     shell:
