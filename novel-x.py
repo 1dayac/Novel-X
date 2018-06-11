@@ -1,11 +1,35 @@
 import click
 import pysam
+import json
+from os import mkdir, path
+from shutil import copy2
+from subprocess import call
 
-def get_read_group():
-    pass
+def get_read_group(bam):
+    readgroup = ""
+    bamfile = pysam.AlignmentFile(bam, "rb")
+    for read in samfile.fetch():
+        try:
+            readgroup = read.get_tag('RG')
+            break
+        except:
+            pass
+    bamfile.close()
+    return readgroup
 
-def get_base_folder():
-    pass
+def create_config(bam, genome, nt, outdir, lr20):
+    data = {}
+    data['genome'] = genome
+    data['additional_flags'] = "--lr20" if lr20 else ""
+    data['blast_db'] = nt if nt != "" else "None"
+    data['root'] = path.dirname(__file__)
+    data['sample'] = path.basename(bam)
+    data['outdir'] = outdir
+    data['readgroup'] = get_read_group(bam)
+    with open(outdir + "/config.json") as configfile:
+        json.dumps(data, configfile, sort_keys=True, indent=4)
+
+
 
 @click.group()
 def main():
@@ -15,19 +39,28 @@ def main():
 @click.option('--outdir', nargs = 1, required = True)
 def restart(outdir):
     """Restart unfinished 10X-pipeline for novel insertion detection."""
-    pass
+    call("cd " + outdir)
+    call("snakemake")
 
 @main.command()
 @click.option('--bam', type=click.File('rb'), help = "No options defined but a name was passed", required = True)
 @click.option('--genome', type=click.File('rb'), help = "Genome file in fasta or fasta.gz format", required = True)
-@click.option('--nt', nargs = 1, help = 'Folder containing NT database. '
+@click.option('--nt', default = "", nargs = 1, help = 'Folder containing NT database. '
                                       'If not provided filtering of non-human sequences is not performed')
 @click.option('--outdir', nargs = 1, required = True)
 @click.option('--lr20', default=False, help = 'If your BAM-file was produced by LongRanger 2.0 you should provide '
                                               'this option to avoid failures')
 def run(bam, genome, nt, outdir, lr20):
     """Run 10X-pipeline for novel insertion detection."""
-    pass
+    try:
+        mkdir(outdir)
+    except:
+        print("Output folder can't be created")
+        return
+    create_config(bam, genome, nt, outdir, lr20)
+    copy2(path.dirname(__file__) + "/Snakefile", outdir)
+    call("cd " + outdir)
+    call("snakemake")
 
 if __name__ == '__main__':
     main()

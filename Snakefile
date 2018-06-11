@@ -1,8 +1,11 @@
-SAMPLE='CHM13_180GB_CrG_GRCh38_phased_possorted'
-GIT_ROOT='~/novel_insertions/'
-BLAST_DB='/opt/ncbi-db/data/nt'
-READGROUP='40587_MissingLibrary_1_unknown_fc'
-GENOME='/home/dmeleshko/genome/genome.fa'
+
+configfile: "config.json"
+
+SAMPLE=config["sample"]
+GIT_ROOT=config["root"]
+BLAST_DB=config["blast_db"]
+READGROUP=config["readgroup"]
+GENOME=config["genome"]
 
 rule all:
     input:
@@ -15,8 +18,8 @@ rule extract_unmapped:
         "unmapped/{sample}.bam"
     shell:
         """
-        #samtools sort -m 30G -n {input} -o sample/{wildcards.sample}.sorted.bam
-        ~/bxtools/bin/bxtools filter sample/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
+        samtools sort -m 30G -n {input} -o sample/{wildcards.sample}.sorted.bam
+        {GIT_ROOT}/bxtools/bin/bxtools filter sample/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
         """
 
 rule convert_bam_to_fastq:
@@ -27,8 +30,8 @@ rule convert_bam_to_fastq:
         temp_dir='temp_reads_{sample}'
     shell:
         """
-        ~/bamtofastq {input} {output.temp_dir}
-        ~/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads --fastqs {output.temp_dir}/*
+        {GIT_ROOT}/bamtofastq {input} {output.temp_dir}
+        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads --fastqs {output.temp_dir}/*
         mv reads/outs/barcoded.fastq.gz {output.fastq}.gz
         gunzip {output.fastq}.gz
         """
@@ -55,13 +58,13 @@ rule velvet_assembly:
     shell:
         """
         rm -rf temp_reads
-        python ~/novel_insertions/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
-        ~/bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads
-        ~/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
+        python {GIT_ROOT}/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
+        {GIT_ROOT}/bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads
+        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
         gunzip reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq.gz
-        bash ~/novel_insertions/interleave.sh < reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
-        ~/velvet/velveth velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
-        ~/velvet/velvetg velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
+        bash {GIT_ROOT}/interleave.sh < reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
+        {GIT_ROOT}/velvet/velveth velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
+        {GIT_ROOT}/velvet/velvetg velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
         mkdir fasta
         cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
         """
@@ -104,8 +107,8 @@ rule align_to_contigs:
         refdata='refdata-{sample}_filtered'
     shell:
         """
-        ~/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger mkref {input.filtered_fasta}
-        ~/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger align --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
+        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger mkref {input.filtered_fasta}
+        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger align --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
         samtools view -b -F 12 temp_{wildcards.sample}/outs/possorted_bam.bam >{output.mapped_bam}    
         """
 
@@ -116,8 +119,8 @@ rule extract_barcode_list:
         barcode_folder='{sample}_barcodes'
     shell:
         """
-        ~/bxtools/bin/bxtools filter {input.mapped_bam} -s 0.2 -c 0.2 -q 50 >mapped/{wildcards.sample}.filtered.bam
-        ~/bxtools/bin/bxtools split-by-ref mapped/{wildcards.sample}.filtered.bam -o {output.barcode_folder}
+        {GIT_ROOT}/bxtools/bin/bxtools filter {input.mapped_bam} -s 0.2 -c 0.2 -q 50 >mapped/{wildcards.sample}.filtered.bam
+        {GIT_ROOT}/bxtools/bin/bxtools split-by-ref mapped/{wildcards.sample}.filtered.bam -o {output.barcode_folder}
         """
 
 rule assemble_barcode_list:
@@ -129,7 +132,7 @@ rule assemble_barcode_list:
     shell:
         """
         mkdir small_bams_{wildcards.sample}
-        ~/bxtools/bin/bxtools extract {input.sample} {input.barcode_folder} {output.small_bams}/
+        {GIT_ROOT}/bxtools/bin/bxtools extract {input.sample} {input.barcode_folder} {output.small_bams}/
         """
 
 
@@ -151,9 +154,9 @@ rule prepare_reads_for_reassembly:
          mv {output.small_reads}_2/$a {output.small_reads}/$a
          return
          fi
-         ~/bamtofastq {input.small_bams}/$a.bam {output.temp_small_reads}-$a
+         {GIT_ROOT}/bamtofastq {input.small_bams}/$a.bam {output.temp_small_reads}-$a
          mv {output.temp_small_reads}-$a {output.temp_small_reads}/$a
-         ~/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id {output.small_reads}-$a --fastqs {output.temp_small_reads}/$a/{READGROUP}
+         {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id {output.small_reads}-$a --fastqs {output.temp_small_reads}/$a/{READGROUP}
          mkdir -p {output.small_reads}/$a
          mv {output.small_reads}-$a/outs/barcoded.fastq.gz {output.small_reads}/$a/
          rm -rf {output.small_reads}-$a
@@ -176,7 +179,7 @@ rule local_assembly:
         a="$(basename $1 | sed "s/\..*q//")"
         gunzip {input.small_reads}/$a/barcoded.fastq.gz
         bash {GIT_ROOT}/interleave.sh < {input.small_reads}/$a/barcoded.fastq {input.small_reads}/$a/R1.fastq {input.small_reads}/$a/R2.fastq
-        python2.7 ~/algorithmic-biology-2/assembler/spades.py --only-assembler -t 1 -k 55 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
+        python2.7 spades.py --only-assembler -t 1 -k 55 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         rm -r {output.assemblies_folder}/$a/K55
         }}
@@ -201,7 +204,7 @@ rule filter_target_contigs:
         mkdir -p {output.filtered_contigs}
         function filter_target_contigs {{
         a="$(basename $1 | sed "s/\..*//")"
-        ~/quast/quast.py --min-contig 199 -R {input.contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
+        quast.py --min-contig 199 -R {input.contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
         python {GIT_ROOT}/filter_correct_record.py {input.contigs}/$a.fasta quast_res/$a/contigs_reports/all_alignments_$a.tsv {output.filtered_contigs}/$a.fasta
         }}
         export -f filter_target_contigs
@@ -217,7 +220,7 @@ rule align_to reference:
         final_alignments='all_alignments_{sample}.tsv'
     shell:
         """
-        ~/quast/quast.py -R {GENOME} {input.contigs} -o quast_res
+        quast.py -R {GENOME} {input.contigs} -o quast_res
         cp quast_res/contigs_reports/all_alignments_final_set_{wildcards.sample}.tsv {output.final_alignments}
         """
 
