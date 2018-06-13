@@ -13,7 +13,25 @@ Novel-X detects and genotypes novel sequence insertions in 10X sequencing datase
 
 ## Installation
 
-Novel-X is a pipeline based on popular Snakemake workflow management system.
+Novel-X is a pipeline based on a popular Snakemake workflow management system and consist of multiple steps and requires a lot of external sofware.
+
+Python dependencies are listed in requrements.txt file. The can be downloded and installed with following command:
+
+```
+pip install -r reqiurements.txt
+```
+
+Following software also should be installed:
+*Longranger (version >= 2.15) - [Download Page](https://support.10xgenomics.com/genome-exome/software/downloads/latest)
+*Velvet - [GitHub Page](https://github.com/dzerbino/velvet) - outdated but still useful assembler with minimal assumptions about the data
+*BlastN - [Download Page](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+*Samtools - [Project Page](http://www.htslib.org/)
+*SPAdes - [Project Page](http://cab.spbu.ru/software/spades/)
+*Quast - [Project Page](http://cab.spbu.ru/software/quast/)
+
+Some of these programms can be installed with conda package. Highly recommended. 
+Path to executables should be provided in path_to_executables_config.json file. Then you are ready to go.
+
 
 ## Commands Options
 
