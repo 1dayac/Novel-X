@@ -1,5 +1,0 @@
-SAMPLE: CHM13_180GB_CrG_GRCh38_phased_possorted
-GIT_ROOT: ~/novel-X/
-BLAST_DB: /opt/ncbi-db/data/nt
-READGROUP: 40587_MissingLibrary_1_unknown_fc
-GENOME: /home/dmeleshko/genome/genome.fa

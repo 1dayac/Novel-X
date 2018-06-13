@@ -1,11 +1,19 @@
 
 configfile: "config.json"
+configfile: "path_to_executables_config.json"
 
 SAMPLE=config["sample"]
 GIT_ROOT=config["root"]
 BLAST_DB=config["blast_db"]
 READGROUP=config["readgroup"]
 GENOME=config["genome"]
+SAMTOOLS=config["samtools"]
+VELVETH=config["velveth"]
+VELVETG=config["velvetg"]
+BLASTN=config["blastn"]
+QUAST=config["quast"]
+SPADES=config["spades.py"]
+LONGRANGER=config["longranger"]
 
 rule all:
     input:
@@ -18,7 +26,7 @@ rule extract_unmapped:
         "unmapped/{sample}.bam"
     shell:
         """
-        samtools sort -m 30G -n {input} -o sample/{wildcards.sample}.sorted.bam
+        {SAMTOOLS} sort -m 30G -n {input} -o sample/{wildcards.sample}.sorted.bam
         {GIT_ROOT}/bxtools/bin/bxtools filter sample/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
         """
 
@@ -63,8 +71,8 @@ rule velvet_assembly:
         {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
         gunzip reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq.gz
         bash {GIT_ROOT}/interleave.sh < reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
-        {GIT_ROOT}/velvet/velveth velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
-        {GIT_ROOT}/velvet/velvetg velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
+        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
+        {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
         mkdir fasta
         cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
         """
@@ -90,7 +98,7 @@ rule filter_contaminants:
         contaminants='blast/{sample}.contaminants'
     shell:
         """
-        blastn -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads 24 > {output.megablast}
+        {BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads 24 > {output.megablast}
         {GIT_ROOT}/cleanmega {output.megablast} {output.cleanmega}
         {GIT_ROOT}/find_contaminations.py {output.cleanmega} {output.contaminants} 
         python {GIT_ROOT}/remove_contaminations.py {output.contaminants} {input.filtered_fasta} {output.filtered_fasta}
@@ -109,7 +117,7 @@ rule align_to_contigs:
         """
         {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger mkref {input.filtered_fasta}
         {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger align --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
-        samtools view -b -F 12 temp_{wildcards.sample}/outs/possorted_bam.bam >{output.mapped_bam}    
+        {SAMTOOLS} view -b -F 12 temp_{wildcards.sample}/outs/possorted_bam.bam >{output.mapped_bam}
         """
 
 rule extract_barcode_list:
@@ -156,7 +164,7 @@ rule prepare_reads_for_reassembly:
          fi
          {GIT_ROOT}/bamtofastq {input.small_bams}/$a.bam {output.temp_small_reads}-$a
          mv {output.temp_small_reads}-$a {output.temp_small_reads}/$a
-         {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id {output.small_reads}-$a --fastqs {output.temp_small_reads}/$a/{READGROUP}
+         {LONGRANGER} basic --id {output.small_reads}-$a --fastqs {output.temp_small_reads}/$a/{READGROUP}
          mkdir -p {output.small_reads}/$a
          mv {output.small_reads}-$a/outs/barcoded.fastq.gz {output.small_reads}/$a/
          rm -rf {output.small_reads}-$a
@@ -179,7 +187,7 @@ rule local_assembly:
         a="$(basename $1 | sed "s/\..*q//")"
         gunzip {input.small_reads}/$a/barcoded.fastq.gz
         bash {GIT_ROOT}/interleave.sh < {input.small_reads}/$a/barcoded.fastq {input.small_reads}/$a/R1.fastq {input.small_reads}/$a/R2.fastq
-        python2.7 spades.py --only-assembler -t 1 -k 55 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
+        python2.7 {SPADES} --only-assembler -t 1 -k 55 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         rm -r {output.assemblies_folder}/$a/K55
         }}
@@ -204,7 +212,7 @@ rule filter_target_contigs:
         mkdir -p {output.filtered_contigs}
         function filter_target_contigs {{
         a="$(basename $1 | sed "s/\..*//")"
-        quast.py --min-contig 199 -R {input.contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
+        {QUAST} --min-contig 199 -R {input.contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
         python {GIT_ROOT}/filter_correct_record.py {input.contigs}/$a.fasta quast_res/$a/contigs_reports/all_alignments_$a.tsv {output.filtered_contigs}/$a.fasta
         }}
         export -f filter_target_contigs
@@ -220,7 +228,7 @@ rule align_to reference:
         final_alignments='all_alignments_{sample}.tsv'
     shell:
         """
-        quast.py -R {GENOME} {input.contigs} -o quast_res
+        {QUAST} -R {GENOME} {input.contigs} -o quast_res
         cp quast_res/contigs_reports/all_alignments_final_set_{wildcards.sample}.tsv {output.final_alignments}
         """
 

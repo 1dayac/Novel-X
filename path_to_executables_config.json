@@ -1,0 +1,9 @@
+{
+"samtools" : "/path/to/samtools/executable",
+"velveth" : "/path/to/velveth/executable",
+"velvetg" : "/path/to/velvetg/executable",
+"blastn" : "/path/to/blastn/executable",
+"quast" : "/path/to/quast.py",
+"spades" : "/path/to/spades.py",
+"longranger" : "/path/to/longranger"
+}
