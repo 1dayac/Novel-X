@@ -1,14 +1,14 @@
 import click
 import pysam
 import json
-from os import mkdir, path
+from os import mkdir, path, symlink
 from shutil import copy2
 from subprocess import call
 
 def get_read_group(bam):
     readgroup = ""
     bamfile = pysam.AlignmentFile(bam, "rb")
-    for read in samfile.fetch():
+    for read in bamfile.fetch():
         try:
             readgroup = read.get_tag('RG')
             break
@@ -56,9 +56,11 @@ def run(bam, genome, nt, outdir, lr20):
         mkdir(outdir)
     except:
         print("Output folder can't be created")
-        return
+        return -1
     create_config(bam, genome, nt, outdir, lr20)
     copy2(path.dirname(__file__) + "/Snakefile", outdir)
+    mkdir(outdir + "/samples")
+    symlink(bam, outdir + "/samples/" + path.basename(bam))
     call("cd " + outdir)
     call("snakemake")
 
