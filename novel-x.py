@@ -39,9 +39,9 @@ def main():
 @click.option('--outdir', nargs = 1, required = True)
 def restart(outdir):
     """Restart unfinished 10X-pipeline for novel insertion detection."""
-    call("cd " + outdir)
-    call("snakemake --unlock")
-    call("snakemake")
+    chdir(outdir)
+    Popen(['snakemake', '--unlock'])
+    Popen(['snakemake'])
 
 @main.command()
 @click.option('--bam', help = "No options defined but a name was passed", required = True)
