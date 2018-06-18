@@ -64,7 +64,8 @@ def run(bam, genome, nt, outdir, lr20):
     mkdir(outdir + "/sample")
     symlink(bam, outdir + "/sample/" + path.basename(bam))
     chdir(outdir)
-    Popen(['snakemake'])
+    process = Popen(['snakemake'])
+    process.wait()
 
 if __name__ == '__main__':
     main()
