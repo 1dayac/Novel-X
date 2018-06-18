@@ -21,7 +21,7 @@ rule all:
 
 rule extract_unmapped:
     input:
-        "sample/{sample}.sorted.bam"
+        "sample/{sample}.bam"
     output:
         "unmapped/{sample}.bam"
     shell:
