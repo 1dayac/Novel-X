@@ -40,8 +40,10 @@ def main():
 def restart(outdir):
     """Restart unfinished 10X-pipeline for novel insertion detection."""
     chdir(outdir)
-    Popen(['snakemake', '--unlock'])
-    Popen(['snakemake'])
+    process = Popen(['snakemake', '--unlock'])
+    process.wait()
+    process = Popen(['snakemake'])
+    process.wait()
 
 @main.command()
 @click.option('--bam', help = "No options defined but a name was passed", required = True)
