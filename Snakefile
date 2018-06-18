@@ -23,7 +23,8 @@ rule extract_unmapped:
     input:
         "sample/{sample}.bam"
     output:
-        "unmapped/{sample}.bam"
+        unmapped="unmapped/{sample}.bam",
+        sorted="sample/{sample}.sorted.bam"
     shell:
         """
         {SAMTOOLS} sort -m 30G -n {input} -o sample/{wildcards.sample}.sorted.bam
