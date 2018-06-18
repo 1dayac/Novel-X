@@ -8,7 +8,7 @@ from subprocess import call
 def get_read_group(bam):
     readgroup = ""
     bamfile = pysam.AlignmentFile(bam, "rb")
-    for read in bamfile.fetch():
+    for read in bamfile.fetch(until_eof=True):
         try:
             readgroup = read.get_tag('RG')
             break
