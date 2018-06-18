@@ -26,7 +26,7 @@ def create_config(bam, genome, nt, outdir, lr20):
     data['sample'] = path.basename(bam)
     data['outdir'] = outdir
     data['readgroup'] = get_read_group(bam)
-    with open(outdir + "/config.json") as configfile:
+    with open(outdir + "/config.json", 'w') as configfile:
         json.dumps(data, configfile, sort_keys=True, indent=4)
 
 
