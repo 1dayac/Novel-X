@@ -43,7 +43,16 @@ Following software also should be installed:
 * Quast - [Project Page](http://cab.spbu.ru/software/quast/)
 
 Some of these programms can be installed with conda package. Highly recommended. 
-Path to executables should be provided in path_to_executables_config.json file. Then you are ready to go.
+Path to executables should be provided in path_to_executables_config.json file.
+Inside bxtools folder run following commands:
+
+```
+./configure
+make
+make install
+```
+
+Then you are ready to go.
 
 
 ## Commands Options
