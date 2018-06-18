@@ -13,6 +13,18 @@ Novel-X detects and genotypes novel sequence insertions in 10X sequencing datase
 
 ## Installation
 
+To start working with Novel-X please clone this repository recursively:
+
+```
+git clone --recursive git@github.com:1dayac/Novel-X.git
+```
+
+If you clone repository non-recursively Novel-X will not work. To fix this run:
+
+```
+git submodule update --init --recursive
+```
+
 Novel-X is a pipeline based on a popular Snakemake workflow management system and consist of multiple steps and requires a lot of external sofware.
 
 Python dependencies are listed in requrements.txt file. The can be downloded and installed with following command:
