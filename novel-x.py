@@ -40,6 +40,7 @@ def main():
 def restart(outdir):
     """Restart unfinished 10X-pipeline for novel insertion detection."""
     call("cd " + outdir)
+    call("snakemake --unlock")
     call("snakemake")
 
 @main.command()
