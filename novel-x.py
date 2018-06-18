@@ -1,9 +1,9 @@
 import click
 import pysam
 import json
-from os import mkdir, path, symlink
+from os import mkdir, path, symlink, chdir
 from shutil import copy2
-from subprocess import call
+from subprocess import call, Popen
 
 def get_read_group(bam):
     readgroup = ""
@@ -62,8 +62,8 @@ def run(bam, genome, nt, outdir, lr20):
     copy2(path.dirname(path.realpath(__file__)) + "/Snakefile", outdir)
     mkdir(outdir + "/samples")
     symlink(bam, outdir + "/samples/" + path.basename(bam))
-    call("cd " + outdir)
-    call("snakemake")
+    chdir(outdir)
+    Popen(['snakemake'])
 
 if __name__ == '__main__':
     main()
