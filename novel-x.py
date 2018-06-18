@@ -59,6 +59,7 @@ def run(bam, genome, nt, outdir, lr20):
         print("Output folder can't be created")
         return -1
     create_config(bam, genome, nt, outdir, lr20)
+    copy2(path.dirname(path.realpath(__file__)) + "/path_to_executables_config.json", outdir)
     copy2(path.dirname(path.realpath(__file__)) + "/Snakefile", outdir)
     mkdir(outdir + "/samples")
     symlink(bam, outdir + "/samples/" + path.basename(bam))
