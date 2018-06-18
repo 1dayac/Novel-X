@@ -15,7 +15,7 @@ def get_read_group(bam):
         except:
             pass
     bamfile.close()
-    return readgroup
+    return readgroup.replace(":", "_")[:-2]
 
 def create_config(bam, genome, nt, outdir, lr20):
     data = {}
