@@ -44,8 +44,8 @@ def restart(outdir):
     call("snakemake")
 
 @main.command()
-@click.option('--bam', type=click.File('rb'), help = "No options defined but a name was passed", required = True)
-@click.option('--genome', type=click.File('rb'), help = "Genome file in fasta or fasta.gz format", required = True)
+@click.option('--bam', help = "No options defined but a name was passed", required = True)
+@click.option('--genome', help = "Genome file in fasta or fasta.gz format", required = True)
 @click.option('--nt', default = "", nargs = 1, help = 'Folder containing NT database. '
                                       'If not provided filtering of non-human sequences is not performed')
 @click.option('--outdir', nargs = 1, required = True)
