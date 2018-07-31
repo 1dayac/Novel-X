@@ -40,7 +40,7 @@ rule convert_bam_to_fastq:
     shell:
         """
         {GIT_ROOT}/bamtofastq {input} {output.temp_dir}
-        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads --fastqs {output.temp_dir}/*
+        {LONGRANGER} basic --id reads --fastqs {output.temp_dir}/*
         mv reads/outs/barcoded.fastq.gz {output.fastq}.gz
         gunzip {output.fastq}.gz
         """
@@ -69,7 +69,7 @@ rule velvet_assembly:
         rm -rf temp_reads
         python {GIT_ROOT}/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
         {GIT_ROOT}/bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads
-        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
+        {LONGRANGER} basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
         gunzip reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq.gz
         bash {GIT_ROOT}/interleave.sh < reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
         {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
@@ -116,8 +116,8 @@ rule align_to_contigs:
         refdata='refdata-{sample}_filtered'
     shell:
         """
-        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger mkref {input.filtered_fasta}
-        {GIT_ROOT}/longranger-2.1.6/longranger-cs/2.1.6/bin/longranger align --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
+        {LONGRANGER} mkref {input.filtered_fasta}
+        {LONGRANGER} align --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
         {SAMTOOLS} view -b -F 12 temp_{wildcards.sample}/outs/possorted_bam.bam >{output.mapped_bam}
         """
 
