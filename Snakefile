@@ -68,12 +68,10 @@ rule velvet_assembly:
         """
         rm -rf temp_reads
         python {GIT_ROOT}/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
-        {GIT_ROOT}/bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads
-        {LONGRANGER} basic --id reads_for_velvet_{wildcards.sample} --fastqs temp_reads/*
-        gunzip reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq.gz
-        bash {GIT_ROOT}/interleave.sh < reads_for_velvet_{wildcards.sample}/outs/barcoded.fastq reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
-        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate reads_for_velvet_{wildcards.sample}/outs/R1.fastq reads_for_velvet_{wildcards.sample}/outs/R2.fastq
+        {GIT_ROOT}/bxtools/bin/bxtools bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads/
+        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/R1.fastq temp_reads/R2.fastq
         {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
+        rm -r temp_reads/
         mkdir fasta
         cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
         """
@@ -150,8 +148,7 @@ rule prepare_reads_for_reassembly:
     input:
          small_bams='small_bams_{sample}'
     output:
-         small_reads='small_reads_{sample}',
-         temp_small_reads='temp_small_reads_{sample}'
+         small_reads='small_reads_{sample}'
     shell:
          """
          mkdir -p {output.temp_small_reads}
@@ -163,12 +160,8 @@ rule prepare_reads_for_reassembly:
          mv {output.small_reads}_2/$a {output.small_reads}/$a
          return
          fi
-         {GIT_ROOT}/bamtofastq {input.small_bams}/$a.bam {output.temp_small_reads}-$a
-         mv {output.temp_small_reads}-$a {output.temp_small_reads}/$a
-         {LONGRANGER} basic --id {output.small_reads}-$a --fastqs {output.temp_small_reads}/$a/{READGROUP}
          mkdir -p {output.small_reads}/$a
-         mv {output.small_reads}-$a/outs/barcoded.fastq.gz {output.small_reads}/$a/
-         rm -rf {output.small_reads}-$a
+         {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.small_bams}/$a.bam {output.small_reads}/$a/
          }}
          export -f prepare_reads
          parallel --jobs 16 prepare_reads ::: {input.small_bams}/*
@@ -186,9 +179,7 @@ rule local_assembly:
         mkdir -p {output.assemblies_folder}
         function local_assembly {{
         a="$(basename $1 | sed "s/\..*q//")"
-        gunzip {input.small_reads}/$a/barcoded.fastq.gz
-        bash {GIT_ROOT}/interleave.sh < {input.small_reads}/$a/barcoded.fastq {input.small_reads}/$a/R1.fastq {input.small_reads}/$a/R2.fastq
-        python2.7 {SPADES} --only-assembler -t 1 -k 55 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
+        python2.7 {SPADES} --only-assembler -t 1 -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         rm -r {output.assemblies_folder}/$a/K55
         }}
