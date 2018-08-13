@@ -25,7 +25,7 @@ If you clone repository non-recursively Novel-X will not work. To fix this run:
 git submodule update --init --recursive
 ```
 
-Novel-X is a pipeline based on a popular Snakemake workflow management system and consist of multiple steps and requires a lot of external sofware.
+Novel-X is a pipeline based on a popular Snakemake workflow management system and consists of multiple steps and requires a lot of external sofware.
 
 Python dependencies are listed in requrements.txt file. The can be downloded and installed with following command:
 
@@ -64,7 +64,7 @@ Novel-X can be run with novel-x.py script with two modes:
 
 A typical command to start Novel-X is 
 ```
-python novel-x.py run --bam my_bam.bam --genome my_genome.fasta --out-dir my_dir
+python novel-x.py run --bam my_bam.bam --genome my_genome.fasta --outdir my_dir
 ```
 
 Optional arguments are:
