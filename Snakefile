@@ -14,6 +14,9 @@ BLASTN=config["blastn"]
 QUAST=config["quast"]
 SPADES=config["spades.py"]
 LONGRANGER=config["longranger"]
+THREADS=cinfig["threads"]
+MEMORY=cinfig["memory"]
+MEMORY_PER_THREAD=cinfig["memory_per_thread"]
 
 rule all:
     input:
@@ -27,7 +30,7 @@ rule extract_unmapped:
         sorted="sample/{sample}.sorted.bam"
     shell:
         """
-        {SAMTOOLS} sort -m 30G -n {input} -o sample/{wildcards.sample}.sorted.bam
+        {SAMTOOLS} sort -@ {THREADS} -m {MEMORY_PER_THREAD}G -n {input} -o sample/{wildcards.sample}.sorted.bam
         {GIT_ROOT}/bxtools/bin/bxtools filter sample/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
         """
 
@@ -68,8 +71,9 @@ rule velvet_assembly:
         """
         rm -rf temp_reads
         python {GIT_ROOT}/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
+        mkdir temp_reads
         {GIT_ROOT}/bxtools/bin/bxtools bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads/
-        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/R1.fastq temp_reads/R2.fastq
+        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/{wildcards.sample}.no_singles_R1.fastq temp_reads/{wildcards.sample}.no_singles_R2.fastq
         {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
         rm -r temp_reads/
         mkdir fasta
@@ -97,7 +101,7 @@ rule filter_contaminants:
         contaminants='blast/{sample}.contaminants'
     shell:
         """
-        {BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads 24 > {output.megablast}
+        {BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads {THREADS} > {output.megablast}
         {GIT_ROOT}/cleanmega {output.megablast} {output.cleanmega}
         {GIT_ROOT}/find_contaminations.py {output.cleanmega} {output.contaminants} 
         python {GIT_ROOT}/remove_contaminations.py {output.contaminants} {input.filtered_fasta} {output.filtered_fasta}
@@ -115,7 +119,7 @@ rule align_to_contigs:
     shell:
         """
         {LONGRANGER} mkref {input.filtered_fasta}
-        {LONGRANGER} align --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
+        {LONGRANGER} align --localcores={THREADS} --localmem={MEMORY} --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
         {SAMTOOLS} view -b -F 12 temp_{wildcards.sample}/outs/possorted_bam.bam >{output.mapped_bam}
         """
 
@@ -179,12 +183,12 @@ rule local_assembly:
         mkdir -p {output.assemblies_folder}
         function local_assembly {{
         a="$(basename $1 | sed "s/\..*q//")"
-        python2.7 {SPADES} --only-assembler -t 1 -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
+        python2.7 {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/R1.fastq --pe1-2 {input.small_reads}/$a/R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         rm -r {output.assemblies_folder}/$a/K55
         }}
         export -f local_assembly
-        parallel --jobs 16 local_assembly ::: {input.small_reads}/*
+        parallel --jobs {THREADS} local_assembly ::: {input.small_reads}/*
         """
 
 
@@ -204,11 +208,11 @@ rule filter_target_contigs:
         mkdir -p {output.filtered_contigs}
         function filter_target_contigs {{
         a="$(basename $1 | sed "s/\..*//")"
-        {QUAST} --min-contig 199 -R {input.contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
+        {QUAST} -t 1 --min-contig 199 -R {input.contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
         python {GIT_ROOT}/filter_correct_record.py {input.contigs}/$a.fasta quast_res/$a/contigs_reports/all_alignments_$a.tsv {output.filtered_contigs}/$a.fasta
         }}
         export -f filter_target_contigs
-        parallel --jobs 16 filter_target_contigs ::: {input.contigs}/*
+        parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
         cat {output.filtered_contigs}/*.fasta >{output.contigs}
         rm -r quast_res
         """

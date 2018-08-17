@@ -17,7 +17,7 @@ def get_read_group(bam):
     bamfile.close()
     return readgroup.replace(":", "_")[:-2]
 
-def create_config(bam, genome, nt, outdir, lr20):
+def create_config(bam, genome, nt, outdir, lr20, m, t):
     data = {}
     data['genome'] = genome
     data['additional_flags'] = "--lr20" if lr20 else ""
@@ -26,6 +26,9 @@ def create_config(bam, genome, nt, outdir, lr20):
     data['sample'] = path.basename(bam)[:-4]
     data['outdir'] = outdir
     data['readgroup'] = get_read_group(bam)
+    data['threads'] = int(m)
+    data['memory'] = int(t)
+    data['memory_for_thread'] = int(t/(2*m))
     with open(outdir + "/config.json", 'w') as configfile:
         json.dump(data, configfile, sort_keys=True, indent=4)
 
@@ -53,14 +56,17 @@ def restart(outdir):
 @click.option('--outdir', nargs = 1, required = True)
 @click.option('--lr20', default=False, help = 'If your BAM-file was produced by LongRanger 2.0 you should provide '
                                               'this option to avoid failures')
-def run(bam, genome, nt, outdir, lr20):
+@click.option('-m', default = 100, nargs = 1, help = 'Available memory specified in gygabytes')
+@click.option('-t', default = 8, nargs = 1, help = 'Number of threads')
+
+def run(bam, genome, nt, outdir, lr20, m, t):
     """Run 10X-pipeline for novel insertion detection."""
     try:
         mkdir(outdir)
     except:
         print("Output folder can't be created")
         return -1
-    create_config(bam, genome, nt, outdir, lr20)
+    create_config(bam, genome, nt, outdir, lr20, m, t)
     copy2(path.dirname(path.realpath(__file__)) + "/path_to_executables_config.json", outdir)
     copy2(path.dirname(path.realpath(__file__)) + "/Snakefile", outdir)
     mkdir(outdir + "/sample")
