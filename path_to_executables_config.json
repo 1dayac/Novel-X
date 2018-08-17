@@ -1,9 +1,9 @@
 {
-"samtools" : "/path/to/samtools/executable",
-"velveth" : "/path/to/velveth/executable",
-"velvetg" : "/path/to/velvetg/executable",
-"blastn" : "/path/to/blastn/executable",
-"quast" : "/path/to/quast.py",
-"spades.py" : "/path/to/spades.py",
-"longranger" : "/path/to/longranger"
+"samtools" : "samtools",
+"velveth" : "velveth",
+"velvetg" : "velvetg",
+"blastn" : "blastn",
+"quast" : "quast.py",
+"spades.py" : "/pbtech_mounts/homes048/dmm2017/algorithmic-biology/assembler/spades.py",
+"longranger" : "/pbtech_mounts/homes048/dmm2017/longranger-2.1.5/longranger-cs/2.1.5/bin/longranger"
 }
