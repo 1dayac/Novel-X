@@ -97,18 +97,14 @@ rule filter_contaminants:
         filtered_fasta='filtered/{sample}_filtered.long.fasta'
     output:
         filtered_fasta='filtered/{sample}_filtered.fasta'
-    shell:
-        """
-        if [ {BLAST_DB} == 'None' ]
-        then
-            {BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads {THREADS} > blast/{wildcards.sample}.megablast
-            {GIT_ROOT}/cleanmega blast/{wildcards.sample}.megablast blast/{wildcards.sample}.cleanmega
-            {GIT_ROOT}/find_contaminations.py blast/{wildcards.sample}.cleanmega blast/{wildcards.sample}.contaminants
-            python {GIT_ROOT}/remove_contaminations.py blast/{wildcards.sample}.contaminants {input.filtered_fasta} {output.filtered_fasta}
-        else
-            cp {input.filtered_fasta} {output.filtered_fasta}
-        fi
-        """
+    run:
+        if BLAST_DB != 'None':
+            shell("{BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads {THREADS} > blast/{wildcards.sample}.megablast")
+            shell("{GIT_ROOT}/cleanmega blast/{wildcards.sample}.megablast blast/{wildcards.sample}.cleanmega")
+            shell("{GIT_ROOT}/find_contaminations.py blast/{wildcards.sample}.cleanmega blast/{wildcards.sample}.contaminants")
+            shell("python {GIT_ROOT}/remove_contaminations.py blast/{wildcards.sample}.contaminants {input.filtered_fasta} {output.filtered_fasta}")"
+        else:
+            shell("cp {input.filtered_fasta} {output.filtered_fasta}")"
 
 
 
