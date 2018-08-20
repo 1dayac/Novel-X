@@ -11,13 +11,14 @@ SAMTOOLS=config["samtools"]
 VELVETH=config["velveth"]
 VELVETG=config["velvetg"]
 BLASTN=config["blastn"]
+BLASTDB=config["blast_db"]
 QUAST=config["quast"]
 SPADES=config["spades.py"]
 LONGRANGER=config["longranger"]
 THREADS=cinfig["threads"]
 MEMORY=cinfig["memory"]
 MEMORY_PER_THREAD=cinfig["memory_per_thread"]
-
+ADDITIONAL_BAMTOFASTQ_FLAGS=cinfig["additional_flags"]
 rule all:
     input:
         expand("{sample}.vcf", sample=SAMPLE)
@@ -42,7 +43,7 @@ rule convert_bam_to_fastq:
         temp_dir='temp_reads_{sample}'
     shell:
         """
-        {GIT_ROOT}/bamtofastq {input} {output.temp_dir}
+        {GIT_ROOT}/bamtofastq {ADDITIONAL_BAMTOFASTQ_FLAGS} {input} {output.temp_dir}
         {LONGRANGER} basic --id reads --fastqs {output.temp_dir}/*
         mv reads/outs/barcoded.fastq.gz {output.fastq}.gz
         gunzip {output.fastq}.gz
@@ -75,8 +76,8 @@ rule velvet_assembly:
         {GIT_ROOT}/bxtools/bin/bxtools bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads/
         {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/{wildcards.sample}.no_singles_R1.fastq temp_reads/{wildcards.sample}.no_singles_R2.fastq
         {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
-        rm -r temp_reads/
-        mkdir fasta
+        rm -rf temp_reads/
+        mkdir -p fasta
         cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
         """
 
@@ -95,16 +96,18 @@ rule filter_contaminants:
     input:
         filtered_fasta='filtered/{sample}_filtered.long.fasta'
     output:
-        filtered_fasta='filtered/{sample}_filtered.fasta',
-        megablast='blast/{sample}.megablast',
-        cleanmega='blast/{sample}.cleanmega',
-        contaminants='blast/{sample}.contaminants'
+        filtered_fasta='filtered/{sample}_filtered.fasta'
     shell:
         """
-        {BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads {THREADS} > {output.megablast}
-        {GIT_ROOT}/cleanmega {output.megablast} {output.cleanmega}
-        {GIT_ROOT}/find_contaminations.py {output.cleanmega} {output.contaminants} 
-        python {GIT_ROOT}/remove_contaminations.py {output.contaminants} {input.filtered_fasta} {output.filtered_fasta}
+        if [ {BLAST_DB} == 'None' ]
+        then
+            {BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads {THREADS} > blast/{wildcards.sample}.megablast
+            {GIT_ROOT}/cleanmega blast/{wildcards.sample}.megablast blast/{wildcards.sample}.cleanmega
+            {GIT_ROOT}/find_contaminations.py blast/{wildcards.sample}.cleanmega blast/{wildcards.sample}.contaminants
+            python {GIT_ROOT}/remove_contaminations.py blast/{wildcards.sample}.contaminants {input.filtered_fasta} {output.filtered_fasta}
+        else
+            cp {input.filtered_fasta} {output.filtered_fasta}
+        fi
         """
 
 
@@ -185,7 +188,7 @@ rule local_assembly:
         a="$(basename $1 | sed "s/\..*q//")"
         python2.7 {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/$a_R1.fastq --pe1-2 {input.small_reads}/$a/$a_R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
-        rm -r {output.assemblies_folder}/$a/K55
+        rm -rf {output.assemblies_folder}/$a/K55
         }}
         export -f local_assembly
         parallel --jobs {THREADS} local_assembly ::: {input.small_reads}/*
@@ -214,7 +217,7 @@ rule filter_target_contigs:
         export -f filter_target_contigs
         parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
         cat {output.filtered_contigs}/*.fasta >{output.contigs}
-        rm -r quast_res
+        rm -rf quast_res
         """
 
 rule align_to reference:
