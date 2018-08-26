@@ -154,7 +154,6 @@ rule prepare_reads_for_reassembly:
          small_reads='small_reads_{sample}'
     shell:
          """
-         mkdir -p {output.temp_small_reads}
          mkdir -p {output.small_reads}
          function prepare_reads {{
          
