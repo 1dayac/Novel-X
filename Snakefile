@@ -181,9 +181,9 @@ rule local_assembly:
         mkdir -p {output.assemblies_folder}
         function local_assembly {{
         a="$(basename $1 | sed "s/\..*q//")"
-        python2.7 {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/$a_R1.fastq --pe1-2 {input.small_reads}/$a/$a_R2.fastq -o {output.assemblies_folder}/$a
+        python2.7 {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/$a\_R1.fastq --pe1-2 {input.small_reads}/$a/$a\_R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
-        rm -rf {output.assemblies_folder}/$a/K55
+        rm -rf {output.assemblies_folder}/$a/K*
         }}
         export -f local_assembly
         parallel --jobs {THREADS} local_assembly ::: {input.small_reads}/*
