@@ -181,6 +181,10 @@ rule local_assembly:
         mkdir -p {output.assemblies_folder}
         function local_assembly {{
         a="$(basename $1 | sed "s/\..*q//")"
+        if [ -f "{output.assemblies_folder}/$a/scaffolds.fasta" ]; then
+        cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
+        return
+        fi
         python2.7 {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/$a\_R1.fastq --pe1-2 {input.small_reads}/$a/$a\_R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         rm -rf {output.assemblies_folder}/$a/K*
@@ -197,6 +201,7 @@ rule filter_target_contigs:
     output:
         filtered_contigs='filtered_contigs_{sample}',
         splitted_insertions='splitted_insertions_{sample}',
+        temp_contigs='temp_{sample}.fasta',
         contigs='final_set_{sample}.fasta'
     shell:
         """
@@ -211,7 +216,8 @@ rule filter_target_contigs:
         }}
         export -f filter_target_contigs
         parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
-        cat {output.filtered_contigs}/*.fasta >{output.contigs}
+        cat {output.filtered_contigs}/*.fasta >{output.temp_contigs}
+        {GIT_ROOT}/contig_length_filter.py 200 {output.temp_contigs} {output.contigs}
         rm -rf quast_res
         """
 
