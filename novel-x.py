@@ -21,7 +21,7 @@ def create_config(bam, genome, nt, outdir, lr20, m, t):
     data = {}
     data['genome'] = genome
     data['additional_flags'] = "--lr20" if lr20 else ""
-    data['blast_db'] = nt if nt != "" else "None"
+    data['blast_db'] = nt + "/nt" if nt != "" else "None"
     data['root'] = path.dirname(path.realpath(__file__))
     data['sample'] = path.basename(bam)[:-4]
     data['outdir'] = outdir
