@@ -54,7 +54,7 @@ def restart(outdir):
 @click.option('--nt', default = "", nargs = 1, help = 'Folder containing NT database. '
                                       'If not provided filtering of non-human sequences is not performed')
 @click.option('--outdir', nargs = 1, required = True)
-@click.option('--lr20', default=False, help = 'If your BAM-file was produced by LongRanger 2.0 you should provide '
+@click.option('--lr20', default=False, is_flag = True, help = 'If your BAM-file was produced by LongRanger 2.0 you should provide '
                                               'this option to avoid failures')
 @click.option('-m', default = 100, nargs = 1, help = 'Available memory specified in gygabytes')
 @click.option('-t', default = 8, nargs = 1, help = 'Number of threads')
