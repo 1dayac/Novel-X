@@ -15,10 +15,10 @@ BLASTDB=config["blast_db"]
 QUAST=config["quast"]
 SPADES=config["spades.py"]
 LONGRANGER=config["longranger"]
-THREADS=cinfig["threads"]
-MEMORY=cinfig["memory"]
-MEMORY_PER_THREAD=cinfig["memory_per_thread"]
-ADDITIONAL_BAMTOFASTQ_FLAGS=cinfig["additional_flags"]
+THREADS=config["threads"]
+MEMORY=config["memory"]
+MEMORY_PER_THREAD=config["memory_per_thread"]
+ADDITIONAL_BAMTOFASTQ_FLAGS=config["additional_flags"]
 rule all:
     input:
         expand("{sample}.vcf", sample=SAMPLE)
