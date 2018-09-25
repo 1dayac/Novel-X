@@ -104,7 +104,7 @@ rule filter_contaminants:
             shell("{GIT_ROOT}/find_contaminations.py blast/{wildcards.sample}.cleanmega blast/{wildcards.sample}.contaminants")
             shell("python {GIT_ROOT}/remove_contaminations.py blast/{wildcards.sample}.contaminants {input.filtered_fasta} {output.filtered_fasta}")
         else:
-            shell("cp {input.filtered_fasta} {output.filtered_fasta}")"
+            shell("cp {input.filtered_fasta} {output.filtered_fasta}")
 
 
 
