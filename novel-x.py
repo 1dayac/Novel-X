@@ -26,9 +26,9 @@ def create_config(bam, genome, nt, outdir, lr20, m, t):
     data['sample'] = path.basename(bam)[:-4]
     data['outdir'] = outdir
     data['readgroup'] = get_read_group(bam)
-    data['threads'] = int(m)
-    data['memory'] = int(t)
-    data['memory_per_thread'] = int(t/(2*m))
+    data['threads'] = int(t)
+    data['memory'] = int(m)
+    data['memory_per_thread'] = int(m/(2*t))
     with open(outdir + "/config.json", 'w') as configfile:
         json.dump(data, configfile, sort_keys=True, indent=4)
 
