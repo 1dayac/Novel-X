@@ -31,7 +31,7 @@ rule extract_unmapped:
         sorted="sample/{sample}.sorted.bam"
     shell:
         """
-        {SAMTOOLS} sort -@ {THREADS} -m {MEMORY_PER_THREAD}G -n {input} -o sample/{wildcards.sample}.sorted.bam
+        {SAMTOOLS} sort -@ {THREADS} -n {input} -o sample/{wildcards.sample}.sorted.bam
         {GIT_ROOT}/bxtools/bin/bxtools filter sample/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
         """
 

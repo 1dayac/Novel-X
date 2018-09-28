@@ -70,7 +70,7 @@ def run(bam, genome, nt, outdir, lr20, m, t):
     copy2(path.dirname(path.realpath(__file__)) + "/path_to_executables_config.json", outdir)
     copy2(path.dirname(path.realpath(__file__)) + "/Snakefile", outdir)
     mkdir(outdir + "/sample")
-    symlink(bam, outdir + "/sample/" + path.basename(bam))
+    symlink(path.abspath(bam), outdir + "/sample/" + path.basename(bam))
     chdir(outdir)
     process = Popen(['snakemake'])
     process.wait()
