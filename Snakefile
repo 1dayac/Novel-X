@@ -99,6 +99,7 @@ rule filter_contaminants:
         filtered_fasta='filtered/{sample}_filtered.fasta'
     run:
         if BLAST_DB != 'None':
+            shell("mkdir -p blast")
             shell("{BLASTN} -task megablast -query {input.filtered_fasta} -db {BLAST_DB} -num_threads {THREADS} > blast/{wildcards.sample}.megablast")
             shell("{GIT_ROOT}/cleanmega blast/{wildcards.sample}.megablast blast/{wildcards.sample}.cleanmega")
             shell("{GIT_ROOT}/find_contaminations.py blast/{wildcards.sample}.cleanmega blast/{wildcards.sample}.contaminants")
