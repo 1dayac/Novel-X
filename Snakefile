@@ -222,7 +222,7 @@ rule filter_target_contigs:
         rm -rf quast_res
         """
 
-rule align_to reference:
+rule align_to_reference:
     input:
         contigs='final_set_{sample}.fasta',
     output:
