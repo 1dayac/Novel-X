@@ -30,7 +30,7 @@ Novel-X is a pipeline based on a popular Snakemake workflow management system an
 Python dependencies are listed in requrements.txt file. The can be downloded and installed with following command:
 
 ```
-pip install -r reqiurements.txt
+pip install -r requirements.txt
 ```
 
 Following software also should be installed:
