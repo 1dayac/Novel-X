@@ -11,7 +11,7 @@ with open(sys.argv[2], "r") as nucmer_file:
     with open(sys.argv[3], "w") as output_handle:
         for line in lines:
             split = line.split("\t")
-            if len(split) < 5:
+            if len(split) < 5 or split[0] == "S1":
                 pass
             else:
                 if split[4].strip() not in records_to_output:
