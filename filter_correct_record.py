@@ -4,9 +4,17 @@ from Bio import SeqIO
 with open(sys.argv[2], "r") as nucmer_file:
     lines = nucmer_file.readlines()
     record_dict = SeqIO.to_dict(SeqIO.parse(sys.argv[1], "fasta"))
+    if len(lines) == 1:
+        exit()
 
+    records_to_output = []
     with open(sys.argv[3], "w") as output_handle:
-        if len(lines) == 1 or  lines[1].startswith("CONTIG"):
-            pass
-        else:
-            SeqIO.write([record_dict[lines[1].split("\t")[4].strip()]], output_handle, "fasta")
+        for line in lines:
+            split = line.split("\t")
+            if len(split) < 5:
+                pass
+            else:
+                if split[4].strip() not in records_to_output:
+                    records_to_output.append(split[4].strip())
+        for record in records_to_output:
+            SeqIO.write([record_dict[record]], output_handle, "fasta")

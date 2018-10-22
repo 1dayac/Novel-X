@@ -201,24 +201,26 @@ rule filter_target_contigs:
         insertions='filtered/{sample}_filtered.fasta'
     output:
         filtered_contigs='filtered_contigs_{sample}',
+        prefilter_contigs='prefiltered_contigs_{sample}',
         splitted_insertions='splitted_insertions_{sample}',
         temp_contigs='temp_{sample}.fasta',
         contigs='final_set_{sample}.fasta'
     shell:
         """
         mkdir -p {output.splitted_insertions}
+        mkdir -p {output.prefilter_contigs}
         python {GIT_ROOT}/split_fasta.py {input.insertions} {output.splitted_insertions}
         mkdir -p quast_res
         mkdir -p {output.filtered_contigs}
         function filter_target_contigs {{
         a="$(basename $1 | sed "s/\..*//")"
-        {QUAST} -t 1 --min-contig 199 -R {input.contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
-        python {GIT_ROOT}/filter_correct_record.py {input.contigs}/$a.fasta quast_res/$a/contigs_reports/all_alignments_$a.tsv {output.filtered_contigs}/$a.fasta
+        {GIT_ROOT}/contig_length_filter.py 500 {input.contigs}/$a.fasta {output.prefilter_contigs}/$a.fasta
+        {QUAST} -t 1 --min-contig 199 -R {output.prefilter_contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
+        python {GIT_ROOT}/filter_correct_record.py {output.prefilter_contigs}/$a.fasta quast_res/$a/contigs_reports/all_alignments_$a.tsv {output.filtered_contigs}/$a.fasta
         }}
         export -f filter_target_contigs
         parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
-        cat {output.filtered_contigs}/*.fasta >{output.temp_contigs}
-        {GIT_ROOT}/contig_length_filter.py 200 {output.temp_contigs} {output.contigs}
+        cat {output.filtered_contigs}/*.fasta >{output.contigs}
         rm -rf quast_res
         """
 
