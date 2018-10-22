@@ -203,7 +203,6 @@ rule filter_target_contigs:
         filtered_contigs='filtered_contigs_{sample}',
         prefilter_contigs='prefiltered_contigs_{sample}',
         splitted_insertions='splitted_insertions_{sample}',
-        temp_contigs='temp_{sample}.fasta',
         contigs='final_set_{sample}.fasta'
     shell:
         """
