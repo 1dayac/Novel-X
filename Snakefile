@@ -72,7 +72,7 @@ rule velvet_assembly:
         rm -rf temp_reads
         mkdir temp_reads
         {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/
-        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/{wildcards.sample}.no_singles_R1.fastq temp_reads/{wildcards.sample}.no_singles_R2.fastq
+        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq
         {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
         rm -rf temp_reads/
         mkdir -p fasta
