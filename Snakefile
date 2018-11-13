@@ -27,17 +27,17 @@ rule extract_unmapped:
     input:
         "sample/{sample}.bam"
     output:
-        unmapped="unmapped/{sample}.bam",
+        unmapped_bam="unmapped_bam/{sample}.bam",
         sorted="sample/{sample}.sorted.bam"
     shell:
         """
-        {SAMTOOLS} sort -@ {THREADS} -n {input} -o sample/{wildcards.sample}.sorted.bam
-        {GIT_ROOT}/bxtools/bin/bxtools filter sample/{wildcards.sample}.sorted.bam -b -s 0.2 -q 10 >{output}
+        {SAMTOOLS} sort -@ {THREADS} -n {input} -o {output.sorted}
+        {GIT_ROOT}/bxtools/bin/bxtools filter {output.sorted} -b -s 0.2 -q 10 >{output.unmapped_bam}
         """
 
 rule convert_bam_to_fastq:
     input:
-        "unmapped/{sample}.bam"
+        "unmapped_bam/{sample}.bam"
     output:
         fastq='reads/{sample}.fastq',
         temp_dir='temp_reads_{sample}'
@@ -64,7 +64,7 @@ rule deinterleave:
 
 rule velvet_assembly:
     input:
-        bam='unmapped/{sample}.bam'
+        bam='unmapped_reads/{sample}.bam'
     output:
         fasta='fasta/{sample}.fasta'
     shell:
