@@ -66,14 +66,12 @@ rule velvet_assembly:
     input:
         bam='unmapped/{sample}.bam'
     output:
-        fasta='fasta/{sample}.fasta',
-        no_singles='unmapped/{sample}.no_singles.bam'
+        fasta='fasta/{sample}.fasta'
     shell:
         """
         rm -rf temp_reads
-        python {GIT_ROOT}/discard_singles.py {input.bam} unmapped/{wildcards.sample}.no_singles.bam
         mkdir temp_reads
-        {GIT_ROOT}/bxtools/bin/bxtools bamtofastq unmapped/{wildcards.sample}.no_singles.bam temp_reads/
+        {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/
         {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/{wildcards.sample}.no_singles_R1.fastq temp_reads/{wildcards.sample}.no_singles_R2.fastq
         {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 2 -max_coverage 100 -scaffolding no
         rm -rf temp_reads/
