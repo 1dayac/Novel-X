@@ -221,7 +221,7 @@ with open(sys.argv[1], "r") as nucmer_file:
     lines = nucmer_file.readlines()
     for i in range(1, len(lines) - 1):
         line = lines[i]
-        if line.startswith("local misassembly") or line.startswith("transloc") or line.startswith("relocation") or line.startswith("indel") or line.startswith("fake") or line.startswith("unk"):
+        if line.startswith("local misassembly") or line.startswith("transloc") or line.startswith("relocation") or line.startswith("indel") or line.startswith("fake"):
             line1 = lines[i-1]
             line2 = lines[i+1]
             if line2.startswith("CON"):
@@ -257,17 +257,10 @@ with open(sys.argv[1], "r") as nucmer_file:
             AnalyzeCurrentSet(al1, al2)
 
 
-print(unique_insertions)
-print(non_unique_insertions)
-
-
-print(unique_deletions)
-print(non_unique_deletions)
-
 records = list(SeqIO.parse(sys.argv[2], "fasta"))
 record_dict = {}
 for record in records:
-    if record not in record_dict:
+    if record.id not in record_dict.keys():
         record_dict[record.id] = record
 with open(sys.argv[3], "w") as vcf, open("insertions_with_anchors.fasta", "w") as fasta:
     for insertion in unique_insertions:
