@@ -64,7 +64,7 @@ rule deinterleave:
 
 rule velvet_assembly:
     input:
-        bam='unmapped_reads/{sample}.bam'
+        bam='unmapped_bam/{sample}.bam'
     output:
         fasta='fasta/{sample}.fasta'
     shell:
