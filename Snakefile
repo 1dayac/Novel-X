@@ -216,9 +216,11 @@ rule filter_target_contigs:
         python {GIT_ROOT}/filter_correct_record.py {output.prefilter_contigs}/$a.fasta quast_res/$a/contigs_reports/all_alignments_$a.tsv {output.filtered_contigs}/$a.fasta
         }}
         export -f filter_target_contigs
+        set +o pipefail
         parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
         cat {output.filtered_contigs}/*.fasta >{output.contigs}
         rm -rf quast_res
+        rm core*
         """
 
 rule align_to_reference:
