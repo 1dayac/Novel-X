@@ -98,11 +98,11 @@ Restart from the last stage:
 python ~/Novel-X/novel-x.py restart --outdir novelx_NA12006
 ```
 
-There is a problem on filter_target_contig stage at the moment. It can exit with non-zero exit code. We recommend to comment out the next line before using restart option. 
+There is a problem on filter_target_contig stage at the moment. It can exit with non-zero exit code. We recommend to comment out the next line before using restart option:
 
-'''
+```
 parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
-'''
+```
 
 
 ## Publications
