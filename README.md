@@ -111,4 +111,4 @@ parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
 
 ## Contact & Support
 
-Feel free to drop any inquiry to [dmitrii.meleshko@gmail.com]() 
+Feel free to drop any inquiry to [meleshko.dmitrii@gmail.com]() 
