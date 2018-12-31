@@ -83,11 +83,31 @@ python novel-x.py restart --help
 ```
 ## Output Formats
 
+Novel-X write results into vcf-file. If your bam-file was named HM2KYBBXX_NA18509.bam, the resulting vcf-file will be named HM2KYBBXX_NA18509.vcf and will be stored inside the outdir folder.
+
 ## Example Commands
+
+Run from the start:
+
+```
+python ~/Novel-X/novel-x.py run --bam /athena/ihlab/scratch/dmm2017/70_samples_data/HLF3WBBXX_NA12006_longranger.bam -t 8 -m 200 --nt /athena/ihlab/scratch/dmm2017/blast_database/  --genome /athena/ihlab/scratch/dmm2017/hg38/hg38.fa --outdir /athena/ihlab/scratch/dmm2017/70_samples/novelx_NA12006
+```
+
+Restart from the last stage:
+```
+python ~/Novel-X/novel-x.py restart --outdir novelx_NA12006
+```
+
+There is a problem on filter_target_contig stage at the moment. It can exit with non-zero exit code. We recommend to comment out the next line before using restart option. 
+
+'''
+parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
+'''
+
 
 ## Publications
 
-"Novel sequence insertion detection using Linked-Reads" is submitted to ECCB-2018 conference. Text is available by request.
+"Novel sequence insertion detection using Linked-Reads" is submitted to RECOMB-2019 conference. Text is available by request.
 
 ## Contact & Support
 

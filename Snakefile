@@ -220,7 +220,7 @@ rule filter_target_contigs:
         parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
         cat {output.filtered_contigs}/*.fasta >{output.contigs}
         rm -rf quast_res
-        rm core*
+        rm -f core*
         """
 
 rule align_to_reference:
