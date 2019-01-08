@@ -221,7 +221,7 @@ with open(sys.argv[1], "r") as nucmer_file:
     lines = nucmer_file.readlines()
     for i in range(1, len(lines) - 1):
         line = lines[i]
-        if line.startswith("local misassembly") or line.startswith("transloc") or line.startswith("relocation") or line.startswith("indel") or line.startswith("fake"):
+        if line.startswith("local misassembly") or line.startswith("transloc") or line.startswith("relocation") or line.startswith("indel") or line.startswith("fake") or line.startswith("unknown"):
             line1 = lines[i-1]
             line2 = lines[i+1]
             if line2.startswith("CON"):
