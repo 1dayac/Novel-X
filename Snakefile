@@ -23,7 +23,7 @@ rule all:
     input:
         expand("{sample}.vcf", sample=SAMPLE)
 
-rule extract_unmapped:
+rule extract_unmapped_reads:
     input:
         "sample/{sample}.bam"
     output:
@@ -35,34 +35,7 @@ rule extract_unmapped:
         {GIT_ROOT}/bxtools/bin/bxtools filter {output.sorted} -b -s 0.2 -q 10 >{output.unmapped_bam}
         """
 
-rule convert_bam_to_fastq:
-    input:
-        "unmapped_bam/{sample}.bam"
-    output:
-        fastq='reads/{sample}.fastq',
-        temp_dir='temp_reads_{sample}'
-    shell:
-        """
-        {GIT_ROOT}/bamtofastq {ADDITIONAL_BAMTOFASTQ_FLAGS} {input} {output.temp_dir}
-        {LONGRANGER} basic --id reads --fastqs {output.temp_dir}/*
-        mv reads/outs/barcoded.fastq.gz {output.fastq}.gz
-        gunzip {output.fastq}.gz
-        """
-
-
-rule deinterleave:
-    input:
-        "reads/{sample}.fastq"
-    output:
-        left='reads/R1_{sample}.fastq',
-        right='reads/R2_{sample}.fastq'
-    shell:
-        """
-        bash {GIT_ROOT}/interleave.sh < {input} {output.left} {output.right}
-        rm {input}
-        """
-
-rule velvet_assembly:
+rule assemble_unmapped_reads:
     input:
         bam='unmapped_bam/{sample}.bam'
     output:
@@ -80,7 +53,7 @@ rule velvet_assembly:
         """
 
 
-rule filter_length:
+rule filter_short_contigs:
     input:
          fasta='fasta/{sample}.fasta'
     output:
@@ -89,6 +62,20 @@ rule filter_length:
          """
          {GIT_ROOT}/contig_length_filter.py 200 {input.fasta} {output.filtered_fasta}
          """
+
+rule convert_unmapped_bam_to_fastq:
+    input:
+        "unmapped_bam/{sample}.bam"
+    output:
+        fastq='reads/{sample}.fastq',
+        temp_dir='temp_reads_{sample}'
+    shell:
+        """
+        {GIT_ROOT}/bamtofastq {ADDITIONAL_BAMTOFASTQ_FLAGS} {input} {output.temp_dir}
+        {LONGRANGER} basic --id reads --fastqs {output.temp_dir}/*
+        mv reads/outs/barcoded.fastq.gz {output.fastq}.gz
+        gunzip {output.fastq}.gz
+        """
 
 rule filter_contaminants:
     input:
@@ -107,7 +94,7 @@ rule filter_contaminants:
 
 
 
-rule align_to_contigs:
+rule align_unmapped_reads_to_the_contigs:
     input:
         filtered_fasta='filtered/{sample}_filtered.fasta',
         temp_dir='temp_reads_{sample}'
@@ -121,7 +108,7 @@ rule align_to_contigs:
         {SAMTOOLS} view -b -F 12 temp_{wildcards.sample}/outs/possorted_bam.bam >{output.mapped_bam}
         """
 
-rule extract_barcode_list:
+rule extract_barcode_lists:
     input:
         mapped_bam='mapped/{sample}.mapped.bam'
     output:
@@ -132,7 +119,7 @@ rule extract_barcode_list:
         {GIT_ROOT}/bxtools/bin/bxtools split-by-ref mapped/{wildcards.sample}.filtered.bam -o {output.barcode_folder}
         """
 
-rule assemble_barcode_list:
+rule extract_bam_subsets:
     input:
         barcode_folder='{sample}_barcodes',
         sample='sample/{sample}.sorted.bam'
@@ -146,7 +133,7 @@ rule assemble_barcode_list:
 
 
 
-rule prepare_reads_for_reassembly:
+rule prepare_reads_for_local_assembly:
     input:
          small_bams='small_bams_{sample}'
     output:
