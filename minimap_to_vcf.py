@@ -140,14 +140,14 @@ def IsInsertion(al1, al2):
     else:
         ref_breakpoint1 = al1.ref2
         ref_breakpoint2 = al2.ref1
-        
+
     if is_rc != is_rc2:
         return False
     if cont11 > cont12:
         cont11, cont12 = cont12, cont11
 
-    if abs(cont12 - cont21) < abs(ref_breakpoint1 - ref_breakpoint2) + 50:
-        print("Not an insertion")
+    if abs(ref_breakpoint1 - ref_breakpoint2) > 50:
+        print("Not an exact insertion")
         return False
 
     if cont12 < cont21:
