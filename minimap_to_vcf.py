@@ -48,7 +48,7 @@ class Insertion(object):
         return abs(self.ref_pos - other.ref_pos) < 100
 
     def size(self):
-        return abs(self.pos2 - self.pos1) - 1
+        return abs(self.pos2 - self.pos1) + self.overlap - 1
 
 def Overlaps(al1, al2):
     cont11 = al1.cont1
@@ -124,41 +124,64 @@ def IsDeletion(al1, al2):
             return True
     return False
 
+def GetOverlap(ref11, ref12, ref21, ref22):
+
+    if ref11 > ref12:
+        ref11, ref12 = ref12, ref11
+    if ref21 > ref22:
+        ref21, ref22 = ref22, ref21
+
+
+    if (min(ref21, ref22) > max(ref11, ref12)) or (max(ref21, ref22) < min(ref11, ref12)):
+        return 0
+
+    if ref11 < ref21 < ref12 and ref22 > ref12:
+        return ref12 - ref21
+
+    if ref11 < ref22 < ref12 and ref21 < ref11:
+        return ref22 - ref11
+
+
+
+    return 0
+
 def IsInsertion(al1, al2):
     cont11 = al1.cont1
     cont12 = al1.cont2
-
+    ref_breakpoint11 = al1.ref1
+    ref_breakpoint12 = al1.ref2
     is_rc = cont12 - cont11 < 0
+
     cont21 = al2.cont1
     cont22 = al2.cont2
+    ref_breakpoint21 = al2.ref1
+    ref_breakpoint22 = al2.ref2
     is_rc2 = cont22 - cont21 < 0
 
     if cont21 > cont22:
         cont21, cont22 = cont22, cont21
-    if is_rc:
-        ref_breakpoint1 = al1.ref1
-        ref_breakpoint2 = al2.ref2
-    else:
-        ref_breakpoint1 = al1.ref2
-        ref_breakpoint2 = al2.ref1
+        ref_breakpoint21, ref_breakpoint22 = ref_breakpoint22, ref_breakpoint21
 
     if is_rc != is_rc2:
         return False
+
+
     if cont11 > cont12:
         cont11, cont12 = cont12, cont11
+        ref_breakpoint11, ref_breakpoint12 = ref_breakpoint12, ref_breakpoint11
 
-    overlap = 0
+    if (ref_breakpoint21 < ref_breakpoint11 and ref_breakpoint11 < ref_breakpoint12):
+        return False
 
-    if cont21 < cont12:
-        overlap = cont12 - cont21
-
-    if abs(ref_breakpoint1 - ref_breakpoint2) > 50 and overlap == 0:
+    overlap = GetOverlap(ref_breakpoint11, ref_breakpoint12, ref_breakpoint21, ref_breakpoint22)
+    print(overlap)
+    if abs(ref_breakpoint12 - ref_breakpoint21) > 50 and overlap == 0:
         print("Not an exact insertion")
         return False
 
     if cont12 < cont21:
         if cont21 - cont12 > 5:
-            ins = Insertion(al1.node, cont12, cont21, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11), overlap)
+            ins = Insertion(al1.node, cont12, cont21, is_rc, al1.chrom, ref_breakpoint12, abs(cont22 - cont21), abs(cont12 - cont11), overlap)
             if ins.size() > 500:
                 print(ins.size())
                 print("Insertion: " + str(al1) + " \t " + str(al2))
@@ -170,7 +193,7 @@ def IsInsertion(al1, al2):
 
 
     if cont22 < cont11:
-        ins = Insertion(al1.node, cont22, cont11, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11), overlap)
+        ins = Insertion(al1.node, cont22, cont11, is_rc, al1.chrom, ref_breakpoint12, abs(cont22 - cont21), abs(cont12 - cont11), overlap)
         if ins.size() > 500:
             print(ins.size())
             print("Insertion: " + str(al1) + " \t " + str(al2))
@@ -234,7 +257,7 @@ with open(sys.argv[1], "r") as nucmer_file:
     lines = nucmer_file.readlines()
     for i in range(1, len(lines) - 1):
         line = lines[i]
-        if line.startswith("local misassembly") or line.startswith("transloc") or line.startswith("relocation") or line.startswith("indel") or line.startswith("fake") or line.startswith("unknown"):
+        if line.startswith("local misassembly") or line.startswith("transloc") or line.startswith("relocation") or line.startswith("indel") or line.startswith("unknown"):
             line1 = lines[i-1]
             line2 = lines[i+1]
             if line2.startswith("CON"):
