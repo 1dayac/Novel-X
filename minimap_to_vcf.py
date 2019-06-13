@@ -132,20 +132,27 @@ def IsInsertion(al1, al2):
     cont22 = al2.cont2
     is_rc2 = cont22 - cont21 < 0
 
+    if cont21 > cont22:
+        cont21, cont22 = cont22, cont21
+    if is_rc:
+        ref_breakpoint1 = al1.ref1
+        ref_breakpoint2 = al2.ref2
+    else:
+        ref_breakpoint1 = al1.ref2
+        ref_breakpoint2 = al2.ref1
+        
     if is_rc != is_rc2:
         return False
     if cont11 > cont12:
         cont11, cont12 = cont12, cont11
 
-    if cont21 > cont22:
-        cont21, cont22 = cont22, cont21
-    if is_rc:
-        ref_breakpoint = al1.ref1
-    else:
-        ref_breakpoint = al1.ref2
+    if abs(cont12 - cont21) < abs(ref_breakpoint1 - ref_breakpoint2) + 50:
+        print("Not an insertion")
+        return False
+
     if cont12 < cont21:
         if cont21 - cont12 > 5:
-            ins = Insertion(al1.node, cont12, cont21, is_rc, al1.chrom, ref_breakpoint, abs(cont22 - cont21), abs(cont12 - cont11))
+            ins = Insertion(al1.node, cont12, cont21, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11))
             if ins.size() > 500:
                 print(ins.size())
                 print("Insertion: " + str(al1) + " \t " + str(al2))
@@ -157,7 +164,7 @@ def IsInsertion(al1, al2):
 
 
     if cont22 < cont11:
-        ins = Insertion(al1.node, cont22, cont11, is_rc, al1.chrom, ref_breakpoint, abs(cont22 - cont21), abs(cont12 - cont11))
+        ins = Insertion(al1.node, cont22, cont11, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11))
         if ins.size() > 500:
             print(ins.size())
             print("Insertion: " + str(al1) + " \t " + str(al2))
