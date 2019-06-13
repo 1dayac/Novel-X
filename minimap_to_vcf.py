@@ -33,7 +33,7 @@ class Deletion(object):
         return  abs(self.ref_pos2 - self.ref_pos1) - 1
 
 class Insertion(object):
-    def __init__(self, node, pos1, pos2, rc, ref_id, ref_pos, anchor1, anchor2):
+    def __init__(self, node, pos1, pos2, rc, ref_id, ref_pos, anchor1, anchor2, overlap):
         self.node = node
         self.pos1 = pos1
         self.pos2 = pos2
@@ -42,6 +42,7 @@ class Insertion(object):
         self.ref_pos = ref_pos
         self.anchor1 = anchor1
         self.anchor2 = anchor2
+        self.overlap = overlap
 
     def __eq__(self, other):
         return abs(self.ref_pos - other.ref_pos) < 100
@@ -146,13 +147,18 @@ def IsInsertion(al1, al2):
     if cont11 > cont12:
         cont11, cont12 = cont12, cont11
 
-    if abs(ref_breakpoint1 - ref_breakpoint2) > 50:
+    overlap = 0
+
+    if cont21 < cont12:
+        overlap = cont12 - cont21
+
+    if abs(ref_breakpoint1 - ref_breakpoint2) > 50 and overlap == 0:
         print("Not an exact insertion")
         return False
 
     if cont12 < cont21:
         if cont21 - cont12 > 5:
-            ins = Insertion(al1.node, cont12, cont21, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11))
+            ins = Insertion(al1.node, cont12, cont21, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11), overlap)
             if ins.size() > 500:
                 print(ins.size())
                 print("Insertion: " + str(al1) + " \t " + str(al2))
@@ -164,7 +170,7 @@ def IsInsertion(al1, al2):
 
 
     if cont22 < cont11:
-        ins = Insertion(al1.node, cont22, cont11, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11))
+        ins = Insertion(al1.node, cont22, cont11, is_rc, al1.chrom, ref_breakpoint1, abs(cont22 - cont21), abs(cont12 - cont11), overlap)
         if ins.size() > 500:
             print(ins.size())
             print("Insertion: " + str(al1) + " \t " + str(al2))
@@ -276,7 +282,7 @@ with open(sys.argv[3], "w") as vcf, open("insertions_with_anchors.fasta", "w") a
             fasta.write(str(record_dict[insertion.node].seq))
             fasta.write("\n")
 
-        ins_seq = str(record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2] if not insertion.rc else record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2].reverse_complement())
+        ins_seq = str(record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2 + insertion.overlap] if not insertion.rc else record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2 + insertion.overlap].reverse_complement())
         vcf.write(str(insertion.ref_id) + "\t" + str(insertion.ref_pos) + "\t" + "." + "\t" + str(record_dict[insertion.node].seq[insertion.pos1]) + "\t" + ins_seq + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\t" + insertion.node + "\t" + str(insertion.anchor1) + "\t" + str(insertion.anchor2) + "\t" + str(insertion.pos1) + "\t" + str(insertion.pos2) + "\n")
 #    for deletion in unique_deletions:
 #        del_seq = str(record_dict[deletion.node].seq[deletion.pos1 : deletion.pos2] if not insertion.rc else record_dict[deletion.node].seq[deletion.pos1 : deletion.pos2].reverse_complement())
