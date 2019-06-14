@@ -292,6 +292,66 @@ with open(sys.argv[1], "r") as nucmer_file:
 
             AnalyzeCurrentSet(al1, al2)
 
+def get_insertion_pos(cont11, cont12, contig_length):
+    if contig_length - max(cont11, cont12) > min(cont11, cont12):
+        return max(cont11, cont12), contig_length
+    else:
+        return 0, min(cont11, cont12)
+
+
+
+with open(sys.argv[1], "r") as nucmer_file:
+    lines = nucmer_file.readlines()
+    for i in range(2, len(lines)):
+        line = lines[i]
+        if line.startswith("CONTIG") and (lines[i-2].startswith("CONTIG") or lines[i-2].startswith("S1")):
+            alignment_line = lines[i-1]
+            if not alignment_line[0].isdigit():
+                continue
+            chrom = alignment_line.split("\t")[4].strip()
+            ref11 = int(alignment_line.split("\t")[0].strip())
+            ref12 = int(alignment_line.split("\t")[1].strip())
+            cont11 = int(alignment_line.split("\t")[2].strip())
+            cont12 = int(alignment_line.split("\t")[3].strip())
+            contig_name = alignment_line.split("\t")[5].strip()
+            if not filter.PassFilter(contig_name):
+                continue
+            contig_length = filter.ParseLength(contig_name)
+            if abs(cont12 - cont11) < 600:
+                continue
+
+            ins_start, ins_end = get_insertion_pos(cont11, cont12, contig_length)
+
+            if abs(ins_start - ins_end) < 50:
+                continue
+
+            if ins_start == 0:
+                if cont12 < cont11:
+                    ref_breakpoint = ref12
+                else:
+                    ref_breakpoint = ref11
+            else:
+                if cont12 < cont11:
+                    ref_breakpoint = ref11
+                else:
+                    ref_breakpoint = ref12
+
+            is_rc = cont11 > cont12
+            if cont12 < cont11:
+                cont12, cont11 = cont11, cont12
+
+
+
+            ins = Insertion(contig_name, ins_start, ins_end, is_rc, chrom, ref_breakpoint, abs(cont12 - cont11),
+                            0, 0)
+
+            if ins.size() > 500:
+                print(ins.size())
+                print("Insertion: " + str(chrom) + " \t " + str(ref_breakpoint))
+            if ins not in unique_insertions:
+                unique_insertions.append(ins)
+            else:
+                non_unique_insertions.append(ins)
 
 records = list(SeqIO.parse(sys.argv[2], "fasta"))
 record_dict = {}
