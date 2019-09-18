@@ -104,6 +104,16 @@ There is a problem on filter_target_contig stage at the moment. It can exit with
 parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
 ```
 
+## Demo command
+
+We placed a toy dataset in demo folder to test that software is installed correctly. You can run command:
+
+```
+python ~/Novel-X/novel-x.py run --bam ~/Novel-X/demo/demo.bam -t 1 -m 1  --genome ~/Novel-X/demo/demo.fasta --outdir out
+```
+
+
+
 
 ## Publications
 
