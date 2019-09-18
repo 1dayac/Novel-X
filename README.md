@@ -107,7 +107,7 @@ parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
 
 ## Publications
 
-"Novel sequence insertion detection using Linked-Reads" is submitted to RECOMB-2019 conference. Text is available by request.
+"Novel sequence insertion detection using Linked-Reads" preprint is available at [https://www.biorxiv.org/content/10.1101/551028v1](https://www.biorxiv.org/content/10.1101/551028v1).
 
 ## Contact & Support
 
