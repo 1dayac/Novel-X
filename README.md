@@ -44,7 +44,7 @@ Following software also should be installed (version numbers used for testing ar
 
 Some of these programms can be installed with conda package. Highly recommended. 
 Path to executables should be provided in path_to_executables_config.json file.
-Inside bxtools folder run following commands:
+Inside bxtools folder run following commands (estimated execution time is around 2 minutes):
 
 ```
 ./configure
@@ -52,6 +52,9 @@ make
 make install
 ```
 
+
+We tested our tool using CentOS Linux 7 OS, but we suppose that it should work at any modern Unix-like system.
+ 
 Then you are ready to go.
 
 
