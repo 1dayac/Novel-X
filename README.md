@@ -33,14 +33,14 @@ Python dependencies are listed in requrements.txt file. The can be downloded and
 pip install -r requirements.txt
 ```
 
-Following software also should be installed:
+Following software also should be installed (version numbers used for testing are shown in bracets):
 
-* Longranger (version >= 2.15) - [Download Page](https://support.10xgenomics.com/genome-exome/software/downloads/latest)
-* Velvet - [GitHub Page](https://github.com/dzerbino/velvet) - outdated but still useful assembler with minimal assumptions about the data
-* BlastN - [Download Page](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
-* Samtools - [Project Page](http://www.htslib.org/)
-* SPAdes - [Project Page](http://cab.spbu.ru/software/spades/)
-* Quast - [Project Page](http://cab.spbu.ru/software/quast/)
+* Longranger (version 2.15) - [Download Page](https://support.10xgenomics.com/genome-exome/software/downloads/latest)
+* Velvet (commit 9adf09f) - [GitHub Page](https://github.com/dzerbino/velvet) - outdated but still useful assembler with minimal assumptions about the data
+* BlastN (version 2.2.31) - [Download Page](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+* Samtools (version 1.7) - [Project Page](http://www.htslib.org/)
+* SPAdes (version 3.13) - [Project Page](http://cab.spbu.ru/software/spades/)
+* Quast (version 4.4)- [Project Page](http://cab.spbu.ru/software/quast/)
 
 Some of these programms can be installed with conda package. Highly recommended. 
 Path to executables should be provided in path_to_executables_config.json file.
