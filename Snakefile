@@ -171,12 +171,9 @@ rule local_assembly:
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         return
         fi
-
-        {VELVETH} {output.assemblies_folder}/$a 63 -shortPaired -fastq -separate {input.small_reads}/$a/$a\_R1.fastq {input.small_reads}/$a/$a\_R2.fastq
-        {VELVETG} {output.assemblies_folder}/$a -exp_cov auto -cov_cutoff 8 -max_coverage 100 -scaffolding no
-
-        cp {output.assemblies_folder}/$a/contigs.fa {output.contigs}/$a.fasta
-        rm -rf {output.assemblies_folder}/$a/
+        python2.7 {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/$a\_R1.fastq --pe1-2 {input.small_reads}/$a/$a\_R2.fastq -o {output.assemblies_folder}/$a
+        cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
+        rm -rf {output.assemblies_folder}/$a/K*
         }}
         export -f local_assembly
         parallel --jobs {THREADS} local_assembly ::: {input.small_reads}/*
