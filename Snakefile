@@ -68,7 +68,7 @@ rule convert_unmapped_bam_to_fastq:
         "unmapped_bam/{sample}.bam"
     output:
         fastq='reads/{sample}.fastq',
-        temp_dir='temp_reads_{sample}'
+        temp_dir=directory('temp_reads_{sample}')
     shell:
         """
         {GIT_ROOT}/bamtofastq {ADDITIONAL_BAMTOFASTQ_FLAGS} {input} {output.temp_dir}
