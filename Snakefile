@@ -97,10 +97,10 @@ rule filter_contaminants:
 rule align_unmapped_reads_to_the_contigs:
     input:
         filtered_fasta='filtered/{sample}_filtered.fasta',
-        temp_dir='temp_reads_{sample}'
+        temp_dir=directory('temp_reads_{sample}')
     output:
         mapped_bam='mapped/{sample}.mapped.bam',
-        refdata='refdata-{sample}_filtered'
+        refdata=directory('refdata-{sample}_filtered')
     shell:
         """
         {LONGRANGER} mkref {input.filtered_fasta}
