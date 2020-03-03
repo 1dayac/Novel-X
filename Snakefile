@@ -112,7 +112,7 @@ rule extract_barcode_lists:
     input:
         mapped_bam='mapped/{sample}.mapped.bam'
     output:
-        barcode_folder='{sample}_barcodes'
+        barcode_folder=directory('{sample}_barcodes')
     shell:
         """
         {GIT_ROOT}/bxtools/bin/bxtools filter {input.mapped_bam} -s 0.2 -c 0.2 -q 50 >mapped/{wildcards.sample}.filtered.bam
@@ -121,7 +121,7 @@ rule extract_barcode_lists:
 
 rule extract_bam_subsets:
     input:
-        barcode_folder='{sample}_barcodes',
+        barcode_folder=directory('{sample}_barcodes'),
         sample='sample/{sample}.sorted.bam'
     output:
         small_bams='small_bams_{sample}'
@@ -137,7 +137,7 @@ rule prepare_reads_for_local_assembly:
     input:
          small_bams='small_bams_{sample}'
     output:
-         small_reads='small_reads_{sample}'
+         small_reads=directory('small_reads_{sample})'
     shell:
          """
          mkdir -p {output.small_reads}
@@ -159,8 +159,8 @@ rule local_assembly:
     input:
         small_reads='small_reads_{sample}'
     output:
-        assemblies_folder='local_assemblies_{sample}',
-        contigs='contigs_{sample}'
+        assemblies_folder=directory('local_assemblies_{sample}'),
+        contigs=directory('contigs_{sample}')
     shell:
         """
         mkdir -p {output.contigs}
@@ -185,9 +185,9 @@ rule filter_target_contigs:
         contigs='contigs_{sample}',
         insertions='filtered/{sample}_filtered.fasta'
     output:
-        filtered_contigs='filtered_contigs_{sample}',
-        prefilter_contigs='prefiltered_contigs_{sample}',
-        splitted_insertions='splitted_insertions_{sample}',
+        filtered_contigs=directory('filtered_contigs_{sample}'),
+        prefilter_contigs=directory('prefiltered_contigs_{sample}'),
+        splitted_insertions=directory('splitted_insertions_{sample}'),
         contigs='final_set_{sample}.fasta'
     shell:
         """
