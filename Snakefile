@@ -121,10 +121,10 @@ rule extract_barcode_lists:
 
 rule extract_bam_subsets:
     input:
-        barcode_folder=directory('{sample}_barcodes'),
+        barcode_folder='{sample}_barcodes',
         sample='sample/{sample}.sorted.bam'
     output:
-        small_bams='small_bams_{sample}'
+        small_bams=directory('small_bams_{sample}')
     shell:
         """
         mkdir small_bams_{wildcards.sample}
@@ -137,7 +137,7 @@ rule prepare_reads_for_local_assembly:
     input:
          small_bams='small_bams_{sample}'
     output:
-         small_reads=directory('small_reads_{sample})'
+         small_reads=directory('small_reads_{sample}')
     shell:
          """
          mkdir -p {output.small_reads}
