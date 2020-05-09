@@ -72,7 +72,7 @@ rule convert_unmapped_bam_to_fastq:
     shell:
         """
         {GIT_ROOT}/bamtofastq {ADDITIONAL_BAMTOFASTQ_FLAGS} {input} {output.temp_dir}
-        {LONGRANGER} basic --id reads --fastqs {output.temp_dir}/*
+        {LONGRANGER} basic --localcores={THREADS} --id reads --fastqs {output.temp_dir}/*
         mv reads/outs/barcoded.fastq.gz {output.fastq}.gz
         gunzip {output.fastq}.gz
         """
