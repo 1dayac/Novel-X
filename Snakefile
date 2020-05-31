@@ -67,14 +67,10 @@ rule convert_unmapped_bam_to_fastq:
     input:
         "unmapped_bam/{sample}.bam"
     output:
-        fastq='reads/{sample}.fastq',
         temp_dir=directory('temp_reads_{sample}')
     shell:
         """
         {GIT_ROOT}/bamtofastq {ADDITIONAL_BAMTOFASTQ_FLAGS} {input} {output.temp_dir}
-        {LONGRANGER} basic --localcores={THREADS} --id reads --fastqs {output.temp_dir}/*
-        mv reads/outs/barcoded.fastq.gz {output.fastq}.gz
-        gunzip {output.fastq}.gz
         """
 
 rule filter_contaminants:
