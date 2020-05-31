@@ -25,7 +25,6 @@ def create_config(bam, genome, nt, outdir, lr20, m, t):
     data['root'] = path.dirname(path.realpath(__file__))
     data['sample'] = path.basename(bam)[:-4]
     data['outdir'] = outdir
-    data['readgroup'] = get_read_group(bam)
     data['threads'] = int(t)
     data['memory'] = int(m)
     data['memory_per_thread'] = int(m/(2*t)) + 1

@@ -5,7 +5,6 @@ configfile: "path_to_executables_config.json"
 SAMPLE=config["sample"]
 GIT_ROOT=config["root"]
 BLAST_DB=config["blast_db"]
-READGROUP=config["readgroup"]
 GENOME=config["genome"]
 SAMTOOLS=config["samtools"]
 VELVETH=config["velveth"]
@@ -100,7 +99,7 @@ rule align_unmapped_reads_to_the_contigs:
     shell:
         """
         {LONGRANGER} mkref {input.filtered_fasta}
-        {LONGRANGER} align --localcores={THREADS} --localmem={MEMORY} --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/{READGROUP}
+        {LONGRANGER} align --localcores={THREADS} --localmem={MEMORY} --id=temp_{wildcards.sample} --reference={output.refdata} --fastqs={input.temp_dir}/
         {SAMTOOLS} view -b -F 12 temp_{wildcards.sample}/outs/possorted_bam.bam >{output.mapped_bam}
         """
 
