@@ -42,9 +42,9 @@ def main():
 def restart(outdir):
     """Restart unfinished 10X-pipeline for novel insertion detection."""
     chdir(outdir)
-    process = Popen(['snakemake', '--unlock'])
+    process = Popen(['snakemake', '--unlock', '--cores', 'all'])
     process.wait()
-    process = Popen(['snakemake'])
+    process = Popen(['snakemake', '--cores', 'all'])
     process.wait()
 
 @main.command()
@@ -71,7 +71,7 @@ def run(bam, genome, nt, outdir, lr20, m, t):
     mkdir(outdir + "/sample")
     symlink(path.abspath(bam), outdir + "/sample/" + path.basename(bam))
     chdir(outdir)
-    process = Popen(['snakemake'])
+    process = Popen(['snakemake', '--cores', str(t)])
     process.wait()
 
 if __name__ == '__main__':
