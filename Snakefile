@@ -213,7 +213,7 @@ rule align_to_reference:
     shell:
         """
         {QUAST} -R {GENOME} {input.contigs} -o quast_res
-        cp quast_res/contigs_reports/all_alignments_final_set_{wildcards.sample}.tsv {output.final_alignments}
+        cp quast_res/contigs_reports/all_alignments_final_set_*.tsv {output.final_alignments}
         """
 
 rule produce_vcf:
