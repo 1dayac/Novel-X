@@ -19,7 +19,7 @@ To start working with Novel-X please clone this repository recursively:
 git clone --recursive git@github.com:1dayac/Novel-X.git
 ```
 
-If you clone repository non-recursively Novel-X will not work. To fix this run:
+If you clone repository non-recursively Novel-X will not work. To fix this run from Novel-X folder:
 
 ```
 git submodule update --init --recursive
@@ -40,7 +40,7 @@ Following software also should be installed (version numbers used for testing ar
 ```
 make ’MAXKMERLENGTH=63’
 ```
-command. For more information, refer to the Velvel manual.
+command. For more information, refer to the Velvet manual.
 
 * BlastN (version 2.2.31) - [Download Page](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 * Samtools (version 1.7) - [Project Page](http://www.htslib.org/)
