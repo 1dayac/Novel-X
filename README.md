@@ -27,13 +27,7 @@ git submodule update --init --recursive
 
 Novel-X is a pipeline based on a popular Snakemake workflow management system and consists of multiple steps and requires a lot of external sofware.
 
-Python dependencies are listed in requrements.txt file. The can be downloded and installed with following command:
-
-```
-pip install -r requirements.txt
-```
-
-Following software also should be installed (version numbers used for testing are shown in bracets):
+First, the following software should be installed (version numbers used for testing are shown in bracets, but other versions should also work):
 
 * Longranger (version 2.15) - [Download Page](https://support.10xgenomics.com/genome-exome/software/downloads/latest)
 * Velvet (commit 9adf09f) - [GitHub Page](https://github.com/dzerbino/velvet) - outdated but still useful assembler with minimal assumptions about the data. Note that we use kmer length of 63 during the assembly, and Velvet should be compiled using
@@ -47,8 +41,21 @@ command. For more information, refer to the Velvet manual.
 * SPAdes (version 3.13) - [Project Page](http://cab.spbu.ru/software/spades/)
 * Quast (version 4.4)- [Project Page](http://cab.spbu.ru/software/quast/)
 
-Some of these programms can be installed with conda package. Highly recommended. 
-Path to executables should be provided in path_to_executables_config.json file.
+All this programs (except LongRanger) can be installed with conda package. We provide conda-env.yml file that allows to install them using the following command:
+
+```
+conda env create -f conda-env.yml
+```
+
+Path to executables (if executables are not in $PATH) should be provided in path_to_executables_config.json file.
+
+
+Python dependencies are listed in requrements.txt file. They can be downloded and installed with following command:
+
+```
+pip install -r requirements.txt
+```
+
 Inside bxtools folder run following commands (estimated execution time is around 2 minutes):
 
 ```

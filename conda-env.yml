@@ -4,9 +4,11 @@ channels:
   - defaults
   - bioconda
 dependencies:
-  - python=3.7
+  - python=3.6
   - velvet
   - spades
   - samtools
   - quast
+  - snakemake
+  - blast
 
