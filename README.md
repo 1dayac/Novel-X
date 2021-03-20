@@ -124,7 +124,7 @@ parallel --jobs {THREADS} filter_target_contigs ::: {input.contigs}/*
 We placed a toy dataset in demo folder to test that software is installed correctly. You can run command:
 
 ```
-python ~/Novel-X/novel-x.py run --bam ~/Novel-X/demo/demo.bam -t 1 -m 1  --genome ~/Novel-X/demo/demo.fasta --outdir out
+python ~/Novel-X/novel-x.py run --bam ~/Novel-X/demo/demo.bam -t 1 -m 5  --genome ~/Novel-X/demo/demo.fasta --outdir out
 ```
 
 This command takes about 15 minutes to finish on our hardware. It produces a vcf-file with a single vcf record.
