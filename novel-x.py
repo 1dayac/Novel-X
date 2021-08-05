@@ -1,4 +1,5 @@
 import click
+from click_option_group import optgroup, MutuallyExclusiveOptionGroup
 import pysam
 import json
 from os import mkdir, path, symlink, chdir
@@ -17,7 +18,7 @@ def get_read_group(bam):
     bamfile.close()
     return readgroup.replace(":", "_")[:-2]
 
-def create_config(bam, genome, nt, outdir, lr20, m, t):
+def create_config(bam, genome, nt, outdir, lr20, m, t, highcoverage, lowcoverage, tenx):
     data = {}
     data['genome'] = path.abspath(genome)
     data['additional_flags'] = "--lr20" if lr20 else ""
@@ -28,6 +29,10 @@ def create_config(bam, genome, nt, outdir, lr20, m, t):
     data['threads'] = int(t)
     data['memory'] = int(m)
     data['memory_per_thread'] = int(m/(2*t)) + 1
+    data['velvet_coverage'] = 8 if highcoverage else 2
+    data['velvet_k_assembly'] = 63 if tenx else 49
+    data['spades_k_assembly'] = 77 if tenx else 49
+
     with open(outdir + "/config.json", 'w') as configfile:
         json.dump(data, configfile, sort_keys=True, indent=4)
 
@@ -57,15 +62,21 @@ def restart(outdir):
                                               'this option to avoid failures')
 @click.option('-m', default = 100, nargs = 1, help = 'Available memory specified in gygabytes')
 @click.option('-t', default = 8, nargs = 1, help = 'Number of threads')
-
-def run(bam, genome, nt, outdir, lr20, m, t):
+@optgroup.group('Coverage option group', cls=MutuallyExclusiveOptionGroup)
+@optgroup.option('--high-coverage', 'highcoverage',  is_flag=True, default=True, help = "Flag for high-coverage data (60X or higher, default)")
+@optgroup.option('--low-coverage', 'lowcoverage', is_flag = True, default = False, help = "Flag for low-coverage data (20-40X)")
+@optgroup.group('Data type option group', cls=MutuallyExclusiveOptionGroup)
+@optgroup.option('--10x', 'tenx', is_flag=True, default=True, help = "Default")
+@optgroup.option('--stlfr', is_flag = True, default = False)
+@optgroup.option('--tellseq', is_flag = True, default = False)
+def run(bam, genome, nt, outdir, lr20, m, t, highcoverage, lowcoverage, tenx, stlfr, tellseq):
     """Run 10X-pipeline for novel insertion detection."""
     try:
         mkdir(outdir)
     except:
-        print("Output folder can't be created")
+        print("Output folder can't be created. Probably it already exists")
         return -1
-    create_config(bam, genome, nt, outdir, lr20, m, t)
+    create_config(bam, genome, nt, outdir, lr20, m, t, highcoverage, lowcoverage, tenx)
     copy2(path.dirname(path.realpath(__file__)) + "/path_to_executables_config.json", outdir)
     copy2(path.dirname(path.realpath(__file__)) + "/Snakefile", outdir)
     mkdir(outdir + "/sample")

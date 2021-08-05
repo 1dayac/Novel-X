@@ -18,6 +18,10 @@ THREADS=config["threads"]
 MEMORY=config["memory"]
 MEMORY_PER_THREAD=config["memory_per_thread"]
 ADDITIONAL_BAMTOFASTQ_FLAGS=config["additional_flags"]
+SPADES_K=config["spades_k_assembly"]
+VELVET_K=config["velvet_k_assembly"]
+VELVET_COVERAGE=config["velvet_coverage"]
+
 rule all:
     input:
         expand("{sample}.vcf", sample=SAMPLE)
@@ -44,8 +48,8 @@ rule assemble_unmapped_reads:
         rm -rf temp_reads
         mkdir temp_reads
         {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/
-        {VELVETH} velvet_{wildcards.sample} 63 -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq
-        {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff 8 -max_coverage 100 -scaffolding no
+        {VELVETH} velvet_{wildcards.sample} {VELVET_K} -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq
+        {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff {VELVET_COVERAGE} -max_coverage 100 -scaffolding no
         rm -rf temp_reads/
         mkdir -p fasta
         cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
@@ -166,7 +170,7 @@ rule local_assembly:
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         return
         fi
-        {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k 77 --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/$a\_R1.fastq --pe1-2 {input.small_reads}/$a/$a\_R2.fastq -o {output.assemblies_folder}/$a
+        {SPADES} --only-assembler -t 1 -m {MEMORY_PER_THREAD} -k {SPADES_K} --cov-cutoff 3 --pe1-1 {input.small_reads}/$a/$a\_R1.fastq --pe1-2 {input.small_reads}/$a/$a\_R2.fastq -o {output.assemblies_folder}/$a
         cp {output.assemblies_folder}/$a/scaffolds.fasta {output.contigs}/$a.fasta
         rm -rf {output.assemblies_folder}/$a/K*
         }}
