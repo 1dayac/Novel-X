@@ -1,11 +1,11 @@
 Novel-X: Novel sequence insertion detection using Linked-Reads
 ======
 
-Novel-X detects and genotypes novel sequence insertions in 10X sequencing dataset using non-trivial read alignment signatures and barocde information.
+Novel-X detects and genotypes novel sequence insertions in 10X sequencing dataset using non-trivial read alignment signatures and barcode information.
 
 # Table of contents
 1. [Installation](#installation)
-2. [Commands Options](#commands-options)
+2. [Command Options](#commands-options)
 3. [Output Formats](#output-formats)
 4. [Example Commands](#example-commands)
 5. [Publications](#publications)
@@ -25,9 +25,9 @@ If you clone repository non-recursively Novel-X will not work. To fix this run f
 git submodule update --init --recursive
 ```
 
-Novel-X is a pipeline based on a popular Snakemake workflow management system and consists of multiple steps and requires a lot of external sofware.
+Novel-X is a pipeline based on a popular Snakemake workflow management system and consists of multiple steps and requires a lot of external software.
 
-First, the following software should be installed (version numbers used for testing are shown in bracets, but other versions should also work):
+First, the following software should be installed (version numbers used for testing are shown in brackets, but other versions should also work):
 
 * Longranger (version 2.15) - [Download Page](https://support.10xgenomics.com/genome-exome/software/downloads/latest)
 * Velvet (commit 9adf09f) - [GitHub Page](https://github.com/dzerbino/velvet) - outdated but still useful assembler with minimal assumptions about the data. Note that we use kmer length of 63 during the assembly, and Velvet should be compiled using
@@ -50,7 +50,7 @@ conda env create -f conda-env.yml
 Path to executables (if executables are not in $PATH) should be provided in path_to_executables_config.json file.
 
 
-Python dependencies are listed in requrements.txt file. They can be downloded and installed with following command:
+Python dependencies are listed in requirements.txt file. They can be downloaded and installed with following command:
 
 ```
 pip install -r requirements.txt
@@ -70,7 +70,7 @@ We tested our tool using CentOS Linux 7 OS, but we suppose that it should work a
 Then you are ready to go.
 
 
-## Commands Options
+## Command Options
 
 Novel-X can be run with novel-x.py script with two modes:
 
@@ -84,7 +84,7 @@ python novel-x.py run --bam my_bam.bam --genome my_genome.fasta --outdir my_dir
 
 Optional arguments are:
 * --lr20 - needed if you run pipeline on a bam file obtained by LongRanger2.0 pipeline
-* --nt - optinal filtering of non-human sequences from the orphan contigs
+* --nt - optional filtering of non-human sequences from the orphan contigs
 
 You can invoke help message by typing:
 
