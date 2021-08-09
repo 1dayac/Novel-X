@@ -5,11 +5,11 @@ Novel-X detects and genotypes novel sequence insertions in 10X sequencing datase
 
 # Table of contents
 1. [Installation](#installation)
-2. [Command Options](#commands-options)
+2. [Command Options](#command-options)
 3. [Output Formats](#output-formats)
 4. [Example Commands](#example-commands)
 5. [Publications](#publications)
-6. [Contact & Support](#contact)
+6. [Contact & Support](#contact-&-support)
 
 ## Installation
 
@@ -30,7 +30,7 @@ Novel-X is a pipeline based on a popular Snakemake workflow management system an
 First, the following software should be installed (version numbers used for testing are shown in brackets, but other versions should also work):
 
 * Longranger (version 2.15) - [Download Page](https://support.10xgenomics.com/genome-exome/software/downloads/latest)
-* Velvet (commit 9adf09f) - [GitHub Page](https://github.com/dzerbino/velvet) - outdated but still useful assembler with minimal assumptions about the data. Note that we use kmer length of 63 during the assembly, and Velvet should be compiled using
+* Velvet (commit 9adf09f) - [GitHub Page](https://github.com/dzerbino/velvet) - outdated but still useful assembler with minimal assumptions about the data. Note that we use kmer length of 63 during the assembly for 10X data, and Velvet should be compiled using
 ```
 make ’MAXKMERLENGTH=63’
 ```
@@ -85,6 +85,22 @@ python novel-x.py run --bam my_bam.bam --genome my_genome.fasta --outdir my_dir
 Optional arguments are:
 * --lr20 - needed if you run pipeline on a bam file obtained by LongRanger2.0 pipeline
 * --nt - optional filtering of non-human sequences from the orphan contigs
+
+We added two option groups to handle different data and its properties (molecule length, intra-molecule coverage, etc.).
+
+**Data option group:**
+
+* --10x - for 10X Genomics data [Default]
+* --tellseq - for Tell-Seq data
+* --stlfr - for stLFR data
+
+Tell-Seq and stLFR data should be converted to LongRanger-compatible bam. For stLFR data, use this [pipeline](https://github.com/BGI-Qingdao/stlfr2supernova_pipeline).
+For Tell-Seq data refer to Tell-Seq paper.
+
+**Coverage group:**
+
+* --high-coverage - best for 60X coverage and higher [Default]
+* --low-coverage - best for 20X-40X coverage
 
 You can invoke help message by typing:
 
