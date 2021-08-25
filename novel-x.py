@@ -78,6 +78,8 @@ def run(bam, genome, nt, outdir, lr20, m, t, highcoverage, lowcoverage, tenx, st
         return -1
     if stlfr or tellseq:
         tenx = False
+    if lowcoverage:
+        highcoverage = False
     create_config(bam, genome, nt, outdir, lr20, m, t, highcoverage, lowcoverage, tenx)
     copy2(path.dirname(path.realpath(__file__)) + "/path_to_executables_config.json", outdir)
     copy2(path.dirname(path.realpath(__file__)) + "/Snakefile", outdir)
