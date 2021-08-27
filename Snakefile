@@ -198,7 +198,7 @@ rule filter_target_contigs:
         function filter_target_contigs {{
         a="$(basename $1 | sed "s/\..*//")"
         {GIT_ROOT}/contig_length_filter.py 500 {input.contigs}/$a.fasta {output.prefilter_contigs}/$a.fasta
-        {QUAST} -t 1 --min-contig 199 -R {output.prefilter_contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
+        {QUAST} -t 1 --fast --min-contig 199 -R {output.prefilter_contigs}/$a.fasta {output.splitted_insertions}/$a.fasta -o quast_res/$a
         python {GIT_ROOT}/filter_correct_record.py {output.prefilter_contigs}/$a.fasta quast_res/$a/contigs_reports/all_alignments_$a.tsv {output.filtered_contigs}/$a.fasta
         }}
         export -f filter_target_contigs
@@ -216,7 +216,7 @@ rule align_to_reference:
         final_alignments='all_alignments_{sample}.tsv'
     shell:
         """
-        {QUAST} -R {GENOME} {input.contigs} -o quast_res
+        {QUAST} --fast -R {GENOME} {input.contigs} -o quast_res
         cp quast_res/contigs_reports/all_alignments_final_set_*.tsv {output.final_alignments}
         """
 

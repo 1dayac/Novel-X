@@ -364,9 +364,11 @@ with open(sys.argv[3], "w") as vcf, open("insertions_with_anchors.fasta", "w") a
             fasta.write(">" + insertion.node + "\n")
             fasta.write(str(record_dict[insertion.node].seq))
             fasta.write("\n")
-
-        ins_seq = str(record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2 + insertion.overlap] if not insertion.rc else record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2 + insertion.overlap].reverse_complement())
-        vcf.write(str(insertion.ref_id) + "\t" + str(insertion.ref_pos) + "\t" + "." + "\t" + str(record_dict[insertion.node].seq[insertion.pos1]) + "\t" + ins_seq + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\t" + insertion.node + "\t" + str(insertion.anchor1) + "\t" + str(insertion.anchor2) + "\t" + str(insertion.pos1) + "\t" + str(insertion.pos2) + "\n")
+        try:
+            ins_seq = str(record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2 + insertion.overlap] if not insertion.rc else record_dict[insertion.node].seq[insertion.pos1 : insertion.pos2 + insertion.overlap].reverse_complement())
+            vcf.write(str(insertion.ref_id) + "\t" + str(insertion.ref_pos) + "\t" + "." + "\t" + str(record_dict[insertion.node].seq[insertion.pos1]) + "\t" + ins_seq + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\t" + insertion.node + "\t" + str(insertion.anchor1) + "\t" + str(insertion.anchor2) + "\t" + str(insertion.pos1) + "\t" + str(insertion.pos2) + "\n")
+        except:
+            pass
 #    for deletion in unique_deletions:
 #        del_seq = str(record_dict[deletion.node].seq[deletion.pos1 : deletion.pos2] if not insertion.rc else record_dict[deletion.node].seq[deletion.pos1 : deletion.pos2].reverse_complement())
 #        vcf.write(str(deletion.ref_id) + "\t" + str(deletion.ref_pos1) + "\t" + "." + "\t" + str(record_dict[deletion.node].seq[deletion.pos1]) + "\t" + del_seq + "\t" + "." + "\t" + "PASS" + "\t" + "DP=100" + "\t" + deletion.node + "\t" + str(deletion.anchor1) + "\t" + str(deletion.anchor2) + "\t" + str(deletion.pos1) + "\t" + str(deletion.pos2) + "\n")
