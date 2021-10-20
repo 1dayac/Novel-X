@@ -21,7 +21,7 @@ ADDITIONAL_BAMTOFASTQ_FLAGS=config["additional_flags"]
 SPADES_K=config["spades_k_assembly"]
 VELVET_K=config["velvet_k_assembly"]
 VELVET_COVERAGE=config["velvet_coverage"]
-
+DATA=config["tenx"]
 rule all:
     input:
         expand("{sample}.vcf", sample=SAMPLE)
@@ -47,12 +47,17 @@ rule assemble_unmapped_reads:
         """
         rm -rf temp_reads
         mkdir temp_reads
-        {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/
-        {VELVETH} velvet_{wildcards.sample} {VELVET_K} -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq
-        {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff {VELVET_COVERAGE} -max_coverage 100 -scaffolding no
-        rm -rf temp_reads/
         mkdir -p fasta
-        cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
+
+        {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/
+        if tenx == "other":
+            {SPADES} -k {VELVET_K} -1 temp_reads/{wildcards.sample}_R1.fastq -2 temp_reads/{wildcards.sample}_R2.fastq --disable-rr --only-assembler -o spades_{wildcards.sample}
+            cp spades_{wildcards.sample}/contigs.fasta fasta/{wildcards.sample}.fasta
+        else:
+            {VELVETH} velvet_{wildcards.sample} {VELVET_K} -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq
+            {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff {VELVET_COVERAGE} -max_coverage 100 -scaffolding no
+            cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
+        rm -rf temp_reads/
         """
 
 

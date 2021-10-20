@@ -32,7 +32,7 @@ def create_config(bam, genome, nt, outdir, lr20, m, t, highcoverage, lowcoverage
     data['velvet_coverage'] = 8 if highcoverage else 2
     data['velvet_k_assembly'] = 63 if tenx else 49
     data['spades_k_assembly'] = 77 if tenx else 49
-
+    data['tenx'] = "10X" if tenx else "other"
     with open(outdir + "/config.json", 'w') as configfile:
         json.dump(data, configfile, sort_keys=True, indent=4)
 
