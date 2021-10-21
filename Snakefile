@@ -43,22 +43,20 @@ rule assemble_unmapped_reads:
         bam='unmapped_bam/{sample}.bam'
     output:
         fasta='fasta/{sample}.fasta'
-    shell:
-        """
-        rm -rf temp_reads
-        mkdir temp_reads
-        mkdir -p fasta
+    run:
+        shell("rm -rf temp_reads")
+        shell("mkdir temp_reads")
+        shell("mkdir -p fasta")
 
-        {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/
-        if tenx == "other":
-            {SPADES} -k {VELVET_K} -1 temp_reads/{wildcards.sample}_R1.fastq -2 temp_reads/{wildcards.sample}_R2.fastq --disable-rr --only-assembler -o spades_{wildcards.sample}
-            cp spades_{wildcards.sample}/contigs.fasta fasta/{wildcards.sample}.fasta
+        shell("{GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/")
+        if DATA == "other":
+            shell("{SPADES} -k {VELVET_K} -1 temp_reads/{wildcards.sample}_R1.fastq -2 temp_reads/{wildcards.sample}_R2.fastq --disable-rr --only-assembler -o spades_{wildcards.sample}")
+            shell("cp spades_{wildcards.sample}/contigs.fasta fasta/{wildcards.sample}.fasta")
         else:
-            {VELVETH} velvet_{wildcards.sample} {VELVET_K} -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq
-            {VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff {VELVET_COVERAGE} -max_coverage 100 -scaffolding no
-            cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta
-        rm -rf temp_reads/
-        """
+            shell("{VELVETH} velvet_{wildcards.sample} {VELVET_K} -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq")
+            shell("{VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff {VELVET_COVERAGE} -max_coverage 100 -scaffolding no")
+            shell("cp velvet_{wildcards.sample}/contigs.fa fasta/{wildcards.sample}.fasta")
+        shell("rm -rf temp_reads/")
 
 
 rule filter_short_contigs:
