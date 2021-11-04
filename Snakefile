@@ -32,6 +32,7 @@ rule extract_unmapped_reads:
     output:
         unmapped_bam="unmapped_bam/{sample}.bam",
         sorted="sample/{sample}.sorted.bam"
+    threads: workflow.cores
     shell:
         """
         {SAMTOOLS} sort -@ {THREADS} -n {input} -o {output.sorted}
@@ -43,6 +44,7 @@ rule assemble_unmapped_reads:
         bam='unmapped_bam/{sample}.bam'
     output:
         fasta='fasta/{sample}.fasta'
+    threads: workflow.cores
     run:
         shell("rm -rf temp_reads")
         shell("mkdir temp_reads")
@@ -103,6 +105,7 @@ rule align_unmapped_reads_to_the_contigs:
     output:
         mapped_bam='mapped/{sample}.mapped.bam',
         refdata=directory('refdata-{sample}_filtered')
+    threads: workflow.cores
     shell:
         """
         {LONGRANGER} mkref {input.filtered_fasta}
@@ -115,6 +118,7 @@ rule extract_barcode_lists:
         mapped_bam='mapped/{sample}.mapped.bam'
     output:
         barcode_folder=directory('{sample}_barcodes')
+    threads: workflow.cores
     shell:
         """
         {GIT_ROOT}/bxtools/bin/bxtools filter {input.mapped_bam} -s 0.2 -c 0.2 -q 50 >mapped/{wildcards.sample}.filtered.bam
@@ -127,6 +131,7 @@ rule extract_bam_subsets:
         sample='sample/{sample}.sorted.bam'
     output:
         small_bams=directory('small_bams_{sample}')
+    threads: workflow.cores
     shell:
         """
         mkdir small_bams_{wildcards.sample}
@@ -154,7 +159,7 @@ rule prepare_reads_for_local_assembly:
          {GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.small_bams}/$a.bam {output.small_reads}/$a/
          }}
          export -f prepare_reads
-         parallel --jobs 16 prepare_reads ::: {input.small_bams}/*
+         parallel --jobs {THREADS} prepare_reads ::: {input.small_bams}/*
          """
 
 rule local_assembly:
