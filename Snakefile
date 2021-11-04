@@ -50,8 +50,8 @@ rule assemble_unmapped_reads:
 
         shell("{GIT_ROOT}/bxtools/bin/bxtools bamtofastq {input.bam} temp_reads/")
         if DATA == "other":
-            shell("{SPADES} -k {VELVET_K} -1 temp_reads/{wildcards.sample}_R1.fastq -2 temp_reads/{wildcards.sample}_R2.fastq --disable-rr --only-assembler -o spades_{wildcards.sample}")
-            shell("cp spades_{wildcards.sample}/contigs.fasta fasta/{wildcards.sample}.fasta")
+            shell("{SPADES} -t {THREADS} -k {VELVET_K} -1 temp_reads/{wildcards.sample}_R1.fastq -2 temp_reads/{wildcards.sample}_R2.fastq --only-assembler -o spades_{wildcards.sample}")
+            shell("cp spades_{wildcards.sample}/scaffolds.fasta fasta/{wildcards.sample}.fasta")
         else:
             shell("{VELVETH} velvet_{wildcards.sample} {VELVET_K} -shortPaired -fastq -separate temp_reads/{wildcards.sample}_R1.fastq temp_reads/{wildcards.sample}_R2.fastq")
             shell("{VELVETG} velvet_{wildcards.sample} -exp_cov auto -cov_cutoff {VELVET_COVERAGE} -max_coverage 100 -scaffolding no")
