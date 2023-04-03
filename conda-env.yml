@@ -4,12 +4,12 @@ channels:
   - defaults
   - bioconda
 dependencies:
-  - python=3.6
+  - python>=3.9
   - velvet
   - spades
   - samtools
   - quast
-  - snakemake
+  - snakemake>=7.0
   - blast
 variables:
   LANG: en_US.utf-8
